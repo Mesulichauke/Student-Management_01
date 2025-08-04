@@ -1,6 +1,6 @@
 // Student Dashboard functionality
 import { auth, db } from './firebase-config.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
 import { doc, getDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
 // Global variables
@@ -300,5 +300,17 @@ document.addEventListener('click', (e) => {
         panel.classList.add('hidden');
     }
 });
+
+// Logout function
+window.logout = async function() {
+    try {
+        await signOut(auth);
+        alert('Logged out successfully');
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Error logging out:', error);
+        alert('Error logging out. Please try again.');
+    }
+};
 
 console.log('Student dashboard initialized');
