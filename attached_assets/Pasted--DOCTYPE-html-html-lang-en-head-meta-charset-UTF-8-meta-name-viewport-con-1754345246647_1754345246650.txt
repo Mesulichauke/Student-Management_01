@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        /* Notification Panel Styles */
+        #notification-panel {
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            display: none;
+        }
+
+        #notification-panel.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            margin-bottom: 30px;
+        }
+
+        .profile-section {
+            display: none; /* Hide by default */
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .profile-section p, .teacher-feedback label, .personal-info label {
+            margin: 10px 0;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], input[type="email"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="submit"], button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #45a049;
+        }
+
+        .dropdown-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .dropdown-button:hover {
+            background-color: #45a049;
+        }
+
+        .dropdown-content {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .dropdown-content p {
+            margin: 5px 0;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Modal Styles */
+        #detailedBehaviorModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            margin: 15% auto;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Teacher Profile</h2>
+
+     <!-- Logout Button -->
+     <button id="logout-btn" onclick="logout()" aria-label="Logout">Logout</button>
+
+    <!-- Notification Section in Teacher's Profile -->
+    <div id="notificationSection" class="hidden">
+        <h4>Notifications</h4>
+        <ul id="notificationsList">
+            <li>No new notifications</li>
+        </ul>
+        <button class="button" onclick="clearNotifications()">Clear All Notifications</button>
+    </div>
+
+    <!-- Button to Toggle Notifications Section Visibility -->
+    <button class="button" onclick="toggleVisibility('notificationSection')">View Notifications</button>
+
+    <!-- Teacher Profile Button -->
+    <button class="dropdown-button" onclick="toggleTeacherProfile()">Toggle Teacher Profile</button>
+
+    <!-- Teacher Profile Content (Initially hidden) -->
+    <div id="teacherProfile" class="profile-section">
+        <div class="personal-info">
+            <p><strong>Name:</strong> John Doe</p>
+            <p><strong>ID:</strong> T12345</p>
+            <p><strong>Email:</strong> johndoe@example.com</p>
+            <p><strong>Phone:</strong> 123-456-7890</p>
+            <p><strong>Address:</strong> 123 Main St, Anytown, USA</p>
+        </div>
+
+        <!-- Attendance Register for Teachers -->
+        <div class="teacher-report">
+            <button class="dropdown-button" onclick="toggleAttendance()">Show Attendance Register</button>
+            <div class="dropdown-content" id="attendanceInfo">
+                <label for="attendanceDate">Date:</label>
+                <input type="date" id="attendanceDate" required>
+                
+                <label for="attendanceStatus">Status:</label>
+                <select id="attendanceStatus" required>
+                    <option value="">Select status</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Late">Late</option>
+                </select>
+                
+                <button onclick="submitAttendance()">Submit Attendance</button>
+            </div>
+
+            <!-- Attendance History Table -->
+            <div id="attendanceHistory">
+                <h3>Attendance History</h3>
+                <table id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Attendance records will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Section for Teachers -->
+        <div class="teacher-report">
+            <button class="dropdown-button" onclick="toggleReports()">Show Reports Section</button>
+            <div class="dropdown-content" id="reportsInfo">
+                <p><strong>Overall Performance:</strong> Outstanding</p>
+                <p><strong>Areas for Improvement:</strong> Classroom management</p>
+                <button class="button" onclick="toggleVisibility('reportSection')">Generate Report</button>
+
+<!-- Nested Reports Section -->
+<div class="dropdown-content" id="reportSection" class="hidden">
+    <div class="graph-container" onclick="toggleDropdown('allReportsDropdown')">
+        <h2>Reports Section</h2>
+        <p>Click to view all reports</p>
+    </div>
+
+    <div class="dropdown-content" id="allReportsDropdown">
+        <!-- All Reports Nested -->
+        <div class="graph-container" onclick="toggleDropdown('overallReportDropdown')">
+            <h3>Overall Report</h3>
+            <p>Click to view and fill the overall report, including Weekly, Monthly, and Term</p>
+        </div>
+
+        <div class="dropdown-content" id="overallReportDropdown">
+            <!-- Weekly Report -->
+            <div class="graph-container" onclick="toggleDropdown('weeklyReportDropdown')">
+                <h4>Weekly Report</h4>
+            </div>
+            <div class="dropdown-content" id="weeklyReportDropdown">
+                <form>
+                    <label for="week">Select Week:</label>
+                    <select id="week" name="week">
+                        <option value="week1">Week 1</option>
+                        <option value="week2">Week 2</option>
+                        <option value="week3">Week 3</option>
+                        <option value="week4">Week 4</option>
+                    </select><br><br>
+
+                    <!-- Uniform Report Aspects -->
+                    <label for="attendance">Attendance (0-100):</label>
+                    <input type="number" id="attendance" name="attendance" min="0" max="100"><br><br>
+
+                    <label for="performance">Performance (0-100):</label>
+                    <input type="number" id="performance" name="performance" min="0" max="100"><br><br>
+
+                    <label for="behavior">Behavior (0-100):</label>
+                    <input type="number" id="behavior" name="behavior" min="0" max="100"><br><br>
+
+                    <label for="participation">Participation (0-100):</label>
+                    <input type="number" id="participation" name="participation" min="0" max="100"><br><br>
+
+                    <label for="weeklyComments">Comments:</label>
+                    <textarea id="weeklyComments" name="weeklyComments" rows="4" cols="50"></textarea><br><br>
+
+                    <input type="submit" value="Submit Weekly Report">
+                </form>
+            </div>
+
+            <!-- Monthly Report -->
+            <div class="graph-container" onclick="toggleDropdown('monthlyReportDropdown')">
+                <h4>Monthly Report</h4>
+            </div>
+            <div class="dropdown-content" id="monthlyReportDropdown">
+                <form>
+                    <label for="month">Select Month:</label>
+                    <select id="month" name="month">
+                        <option value="january">January</option>
+                        <option value="february">February</option>
+                        <option value="march">March</option>
+                        <option value="april">April</option>
+                    </select><br><br>
+
+                    <!-- Uniform Report Aspects -->
+                    <label for="attendance">Attendance (0-100):</label>
+                    <input type="number" id="attendance" name="attendance" min="0" max="100"><br><br>
+
+                    <label for="performance">Performance (0-100):</label>
+                    <input type="number" id="performance" name="performance" min="0" max="100"><br><br>
+
+                    <label for="behavior">Behavior (0-100):</label>
+                    <input type="number" id="behavior" name="behavior" min="0" max="100"><br><br>
+
+                    <label for="participation">Participation (0-100):</label>
+                    <input type="number" id="participation" name="participation" min="0" max="100"><br><br>
+
+                    <label for="monthlyComments">Comments:</label>
+                    <textarea id="monthlyComments" name="monthlyComments" rows="4" cols="50"></textarea><br><br>
+
+                    <input type="submit" value="Submit Monthly Report">
+                </form>
+            </div>
+
+            <!-- Term Report -->
+            <div class="graph-container" onclick="toggleDropdown('termReportDropdown')">
+                <h4>Term Report</h4>
+            </div>
+            <div class="dropdown-content" id="termReportDropdown">
+                <form>
+                    <label for="term">Select Term:</label>
+                    <select id="term" name="term">
+                        <option value="term1">Term 1</option>
+                        <option value="term2">Term 2</option>
+                        <option value="term3">Term 3</option>
+                    </select><br><br>
+
+                    <!-- Uniform Report Aspects -->
+                    <label for="attendance">Attendance (0-100):</label>
+                    <input type="number" id="attendance" name="attendance" min="0" max="100"><br><br>
+
+                    <label for="performance">Performance (0-100):</label>
+                    <input type="number" id="performance" name="performance" min="0" max="100"><br><br>
+
+                    <label for="behavior">Behavior (0-100):</label>
+                    <input type="number" id="behavior" name="behavior" min="0" max="100"><br><br>
+
+                    <label for="participation">Participation (0-100):</label>
+                    <input type="number" id="participation" name="participation" min="0" max="100"><br><br>
+
+                    <label for="termComments">Comments:</label>
+                    <textarea id="termComments" name="termComments" rows="4" cols="50"></textarea><br><br>
+
+                    <input type="submit" value="Submit Term Report">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+       <!-- Performance Overview for Teachers -->
+       <div class="teacher-report">
+        <button class="dropdown-button" onclick="togglePerformance()">Show Performance Overview</button>
+        <div class="dropdown-content" id="performanceInfo">
+            
+            <p><strong>Classroom Engagement:</strong> Excellent</p>
+            <p><strong>Student Feedback:</strong> Positive</p>
+            <p><strong>Teachers attendance:</strong> Good</p>
+            <p><strong>Low Performing Subjects:</strong></p>
+                <ul id="lowPerforming"></ul>
+                <p><strong>Average Performing Subjects:</strong></p>
+                <ul id="averagePerforming"></ul>
+                <p><strong>High Performing Subjects:</strong></p>
+                <ul id="highPerforming"></ul>
+            <!-- View Performance Details Button -->
+            <button class="button" onclick="toggleVisibility('performanceDetails')">View Performance Details</button>
+
+            <!-- Performance Details Section -->
+            <div id="performanceDetails" class="hidden">
+                <!-- Performance Breakdown -->
+                <div>
+                    <h4>Performance Overview</h4>
+                    <button class="button" onclick="toggleVisibility('performanceWeekly')">Weekly Performance</button>
+                    <div id="performanceWeekly" class="hidden">
+                        <p>Week 1: 75%</p>
+                        <p>Week 2: 85%</p>
+                        <p>Week 3: 90%</p>
+                    </div>
+                    <button class="button" onclick="toggleVisibility('performanceMonthly')">Monthly Performance</button>
+                    <div id="performanceMonthly" class="hidden">
+                        <p>January: 80%</p>
+                        <p>February: 85%</p>
+                        <p>March: 90%</p>
+                    </div>
+                    <button class="button" onclick="toggleVisibility('performanceTerm')">Term Performance</button>
+                    <div id="performanceTerm" class="hidden">
+                        <p>Term 1: 82%</p>
+                        <p>Term 2: 86%</p>
+                        <p>Term 3: 90%</p>
+                    </div>
+                </div>
+
+                <!-- Behavior Breakdown -->
+                <div>
+                    <h4>Behavior Overview</h4>
+                    <button class="button" onclick="toggleVisibility('behaviorWeekly')">Weekly Behavior</button>
+                    <div id="behaviorWeekly" class="hidden">
+                        <p>Week 1: Good</p>
+                        <p>Week 2: Excellent</p>
+                        <p>Week 3: Average</p>
+                    </div>
+                    <button class="button" onclick="toggleVisibility('behaviorMonthly')">Monthly Behavior</button>
+                    <div id="behaviorMonthly" class="hidden">
+                        <p>January: Good</p>
+                        <p>February: Excellent</p>
+                        <p>March: Average</p>
+                    </div>
+                    <button class="button" onclick="toggleVisibility('behaviorTerm')">Term Behavior</button>
+                    <div id="behaviorTerm" class="hidden">
+                        <p>Term 1: Excellent</p>
+                        <p>Term 2: Good</p>
+                        <p>Term 3: Average</p>
+                    </div>
+                </div>
+
+                <!-- Attendance Breakdown -->
+                <div>
+                    <h4>Attendance Overview</h4>
+                    <button class="button" onclick="toggleVisibility('attendanceWeekly')">Weekly Attendance</button>
+                    <div id="attendanceWeekly" class="hidden">
+                        <p>Week 1: 95%</p>
+                        <p>Week 2: 90%</p>
+                        <p>Week 3: 85%</p>
+                    </div>
+                    <button class="button" onclick="toggleVisibility('attendanceMonthly')">Monthly Attendance</button>
+                    <div id="attendanceMonthly" class="hidden">
+                        <p>January: 92%</p>
+                        <p>February: 90%</p>
+                        <p>March: 88%</p>
+                    </div>
+                    <button class="button" onclick="toggleVisibility('attendanceTerm')">Term Attendance</button>
+                    <div id="attendanceTerm" class="hidden">
+                        <p>Term 1: 94%</p>
+                        <p>Term 2: 91%</p>
+                        <p>Term 3: 89%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Behavior Report -->
+    <div class="teacher-report">
+        <button class="dropdown-button" onclick="toggleBehavior()">Show Behavior Report</button>
+        <div class="dropdown-content" id="behaviorInfo">
+            <p><strong>Respect:</strong> Good</p>
+            <p><strong>Responsibility:</strong> Excellent</p>
+            <p><strong>Teamwork:</strong> Needs Improvement</p>
+            <p><strong>Agility:</strong> Satisfactory</p>
+            <button onclick="viewDetailedBehavior()">View Detailed Behavior</button>
+        </div>
+    </div>
+
+    <!-- Detailed Behavior, Performance, and Attendance Modal (Initially Hidden) -->
+    <div id="detailedBehaviorModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeDetailedBehavior()">&times;</span>
+            <h3>Detailed Breakdown</h3>
+            <div>
+                <h4>Performance Breakdown:</h4>
+                <p><strong>Classroom Engagement:</strong> Excellent</p>
+                <p><strong>Student Feedback:</strong> Positive</p>
+                <p><strong>Teacher's Attendance:</strong> Good</p>
+            </div>
+            <div>
+                <h4>Behavior Breakdown:</h4>
+                <p><strong>Respect:</strong> Good</p>
+                <p><strong>Responsibility:</strong> Excellent</p>
+                <p><strong>Teamwork:</strong> Needs Improvement</p>
+                <p><strong>Agility:</strong> Satisfactory</p>
+            </div>
+            <div>
+                <h4>Attendance Breakdown:</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Attendance details will be populated here -->
+                        <tr>
+                            <td>2025-01-01</td>
+                            <td>Present</td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-02</td>
+                            <td>Late</td>
+                        </tr>
+                        <tr>
+                            <td>2025-01-03</td>
+                            <td>Absent</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="teacher-performance">
+                <h3>Teacher's Performance Score:</h3>
+                <p id="performance-score">0</p> <!-- Display Teacher's Performance Score -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Student Profile Section -->
+<h2>Student Profile</h2>
+<button class="dropdown-button" onclick="toggleStudentInfo()">Show Student Info</button>
+<div class="dropdown-content" id="studentInfo">
+    <label for="studentName">Student Name:</label>
+    <input type="text" id="studentName" placeholder="Enter student name" required>
+
+    <label for="studentID">Student ID:</label>
+    <input type="text" id="studentID" placeholder="Enter student ID" required>
+
+    <form id="score-form"></form>
+
+    <label for="gradeSelect">Grade:</label>
+    <select id="gradeSelect" required>
+        <option value="">Select a grade</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+    </select>
+
+    <label for="subjectSelect">Subject:</label>
+    <select id="subjectSelect" required>
+        <option value="">Select a subject</option>
+        <option value="Math">Math</option>
+        <option value="Science">Science</option>
+        <option value="English">English</option>
+        <option value="History">History</option>
+    </select>
+
+    <label for="subjectScore">Subject Score:</label>
+    <input type="number" id="subjectScore" min="0" max="100" placeholder="Enter score" required>
+
+        <!-- Student Behavior Report -->
+        <div class="student-report">
+            <button class="dropdown-button" onclick="toggleStudentBehavior()">Show Student Behavior Report</button>
+            <div class="dropdown-content" id="studentBehaviorInfo">
+                <p><strong>Respect:</strong>
+                    <input type="number" id="studentRespectScore" min="0" max="100" placeholder="Enter score for Respect" required>
+                </p>
+                <p><strong>Responsibility:</strong>
+                    <input type="number" id="studentResponsibilityScore" min="0" max="100" placeholder="Enter score for Responsibility" required>
+                </p>
+                <p><strong>Teamwork:</strong>
+                    <input type="number" id="studentTeamworkScore" min="0" max="100" placeholder="Enter score for Teamwork" required>
+                </p>
+                <p><strong>Agility:</strong>
+                    <input type="number" id="studentAgilityScore" min="0" max="100" placeholder="Enter score for Agility" required>
+                </p>
+                <label for="behaviorScore">Behavior Score:</label>
+                <input type="number" id="behaviorScore" min="0" max="100" placeholder="Enter overall behavior score" required>
+
+                <label for="comments">Comments:</label>
+                <textarea id="comments" placeholder="Enter comments" required></textarea>
+                <button type="button" onclick="submitStudentBehaviorScores()">Submit Student Behavior Scores</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+
+function toggleVisibility(id) {
+        const element = document.getElementById(id);
+        element.style.display = element.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function logout() {
+        // Redirect to the home page
+        window.location.href = 'index.html'; // Change 'index.html' to your actual home page filename
+    }
+
+function viewTeacherScoring() {
+        // Example scoring logic based on student performance
+        const studentPerformances = [
+            { name: "Student A", grade: 85 },
+            { name: "Student B", grade: 78 },
+            { name: "Student C", grade: 92 },
+            { name: "Student D", grade: 70 }
+        ];
+
+        const totalGrades = studentPerformances.reduce((sum, student) => sum + student.grade, 0);
+        const averagePerformance = totalGrades / studentPerformances.length;
+
+        let score = 0;
+        if (averagePerformance >= 90) {
+            score = "Excellent";
+        } else if (averagePerformance >= 75) {
+            score = "Good";
+        } else if (averagePerformance >= 50) {
+            score = "Average";
+        } else {
+            score = "Needs Improvement";
+        }
+
+        const resultDiv = document.getElementById("teacher-scoring-result");
+        resultDiv.innerHTML = `<p>Teacher's Score: <strong>${score}</strong></p>`;
+        resultDiv.style.display = "block";
+    }
+
+     // Function to toggle the visibility of the entire Teacher Profile section
+     function toggleTeacherProfile() {
+        const profileSection = document.getElementById("teacherProfile");
+        if (profileSection.style.display === "none" || profileSection.style.display === "") {
+            profileSection.style.display = "block";
+        } else {
+            profileSection.style.display = "none";
+        }
+    }
+
+    // Function to toggle the visibility of the student info section
+    function toggleStudentInfo() {
+        const studentInfoSection = document.getElementById("studentInfo");
+        if (studentInfoSection.style.display === "none" || studentInfoSection.style.display === "") {
+            studentInfoSection.style.display = "block";
+        } else {
+            studentInfoSection.style.display = "none";
+        }
+    }
+
+    // Function to toggle the attendance section
+    function toggleAttendance() {
+        const attendanceSection = document.getElementById("attendanceInfo");
+        if (attendanceSection.style.display === "none" || attendanceSection.style.display === "") {
+            attendanceSection.style.display = "block";
+        } else {
+            attendanceSection.style.display = "none";
+        }
+    }
+
+    // Function to submit the attendance and update the history
+    function submitAttendance() {
+        const date = document.getElementById("attendanceDate").value;
+        const status = document.getElementById("attendanceStatus").value;
+        
+        if (!date || !status) {
+            alert("Please fill in both date and status.");
+            return;
+        }
+
+        const table = document.getElementById("attendanceTable").getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow(table.rows.length);
+        const dateCell = newRow.insertCell(0);
+        const statusCell = newRow.insertCell(1);
+
+        dateCell.textContent = date;
+        statusCell.textContent = status;
+
+        // Clear form inputs
+        document.getElementById("attendanceDate").value = "";
+        document.getElementById("attendanceStatus").value = "";
+    }
+
+    function toggleVisibility(id) {
+        const element = document.getElementById(id);
+        if (element.classList.contains('hidden')) {
+            element.classList.remove('hidden');
+        } else {
+            element.classList.add('hidden');
+        }
+    }
+
+    function toggleDropdown(id) {
+        const dropdown = document.getElementById(id);
+        if (dropdown.style.display === "none" || dropdown.style.display === "") {
+            dropdown.style.display = "block";
+        } else {
+            dropdown.style.display = "none";
+        }
+    }
+
+    function clearNotifications() {
+        const notificationsList = document.getElementById("notificationsList");
+        notificationsList.innerHTML = "<li>No new notifications</li>";
+    }
+
+    function toggleTeacherProfile() {
+        toggleVisibility('teacherProfile');
+    }
+
+    function toggleAttendance() {
+        toggleVisibility('attendanceInfo');
+    }
+
+    function toggleReports() {
+        toggleVisibility('reportsInfo');
+    }
+
+    function submitAttendance() {
+        // Your attendance submission logic here
+        const date = document.getElementById('attendanceDate').value;
+        const status = document.getElementById('attendanceStatus').value;
+        const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
+
+        if (date && status) {
+            const newRow = table.insertRow();
+            const dateCell = newRow.insertCell(0);
+            const statusCell = newRow.insertCell(1);
+            dateCell.textContent = date;
+            statusCell.textContent = status;
+        }
+    }
+
+    function viewDetailedBehavior() {
+        toggleVisibility('detailedBehaviorModal');
+    }
+
+    function closeDetailedBehavior() {
+        document.getElementById('detailedBehaviorModal').classList.add('hidden');
+    }
+
+    function generateReport() {
+        // Your report generation logic here
+        const reportType = document.getElementById('reportType').value;
+        const reportDuration = document.getElementById('reportDuration').value;
+        const customReport = document.getElementById('customReport').value;
+        document.getElementById('reportPreview').textContent = `Generating ${reportType} for ${reportDuration} with the following details: ${customReport}`;
+    }
+
+    function submitReport() {
+        // Your report submission logic here
+        const reportType = document.getElementById('reportType').value;
+        const reportDuration = document.getElementById('reportDuration').value;
+        const customReport = document.getElementById('customReport').value;
+        document.getElementById('submitMessage').classList.remove('hidden');
+    }
+
+    function toggleStudentInfo() {
+        toggleVisibility('studentInfo');
+    }
+
+    function submitStudentBehaviorScores() {
+        // Your student behavior submission logic here
+        const respect = document.getElementById('studentRespectScore').value;
+        const responsibility = document.getElementById('studentResponsibilityScore').value;
+        const teamwork = document.getElementById('studentTeamworkScore').value;
+        const agility = document.getElementById('studentAgilityScore').value;
+        const overallBehavior = document.getElementById('behaviorScore').value;
+        const comments = document.getElementById('comments').value;
+
+        alert(`Submitted: Respect=${respect}, Responsibility=${responsibility}, Teamwork=${teamwork}, Agility=${agility}, Overall Behavior=${overallBehavior}, Comments=${comments}`);
+    }
+
+    // Function to toggle the Performance section
+    function togglePerformance() {
+        const performanceSection = document.getElementById("performanceInfo");
+        if (performanceSection.style.display === "none" || performanceSection.style.display === "") {
+            performanceSection.style.display = "block";
+        } else {
+            performanceSection.style.display = "none";
+        }
+    }
+
+    // Function to toggle the Behavior Report section
+    function toggleBehavior() {
+        const behaviorSection = document.getElementById("behaviorInfo");
+        if (behaviorSection.style.display === "none" || behaviorSection.style.display === "") {
+            behaviorSection.style.display = "block";
+        } else {
+            behaviorSection.style.display = "none";
+        }
+    }
+
+    // Function to view detailed behavior, performance, and attendance
+function viewDetailedBehavior() {
+    // Show the modal for detailed behavior information
+    const modal = document.getElementById("detailedBehaviorModal");
+    modal.style.display = "block";
+}
+
+// Function to close the modal
+function closeDetailedBehavior() {
+    const modal = document.getElementById("detailedBehaviorModal");
+    modal.style.display = "none";
+}
+
+// Modal close button styling (Optional)
+document.querySelector(".close-btn").style.fontSize = "30px";
+document.querySelector(".close-btn").style.cursor = "pointer";
+
+document.getElementById("submit-scores").addEventListener("click", function() {
+  // Get the student scores from the input fields
+  const studentScores = Array.from(document.querySelectorAll(".student-input"))
+    .map(input => parseFloat(input.value))
+    .filter(score => !isNaN(score));
+
+  
+
+  // Calculate the average score
+  const totalScore = studentScores.reduce((total, score) => total + score, 0);
+  const averageScore = totalScore / studentScores.length;
+
+  // Display Teacher's Performance based on the average score
+  const performanceScore = calculateTeacherPerformance(averageScore);
+  document.getElementById("performance-score").textContent = performanceScore.toFixed(2);
+});
+
+// Function to calculate teacher's performance based on student average score
+function calculateTeacherPerformance(averageScore) {
+  let performance = 0;
+  if (averageScore >= 90) {
+    performance = 100; // Excellent performance
+  } else if (averageScore >= 75) {
+    performance = 85; // Good performance
+  } else if (averageScore >= 60) {
+    performance = 70; // Satisfactory performance
+  } else {
+    performance = 50; // Needs improvement
+  }
+  return performance;
+}
+// Submit Scores logic
+function submitScores() {
+    const studentName = document.getElementById('studentName').value;
+    const studentID = document.getElementById('studentID').value;
+    const grade = document.getElementById('gradeSelect').value;
+    const subject = document.getElementById('subjectSelect').value;
+    const subjectScore = document.getElementById('subjectScore').value;
+    const behavior = document.getElementById('behaviorSelect').value;
+    const behaviorScore = document.getElementById('behaviorScore').value;
+    const comments = document.getElementById('comments').value;
+
+    console.log('Student Name:', studentName);
+    console.log('Student ID:', studentID);
+    console.log('Grade:', grade);
+    console.log('Subject:', subject);
+    console.log('Subject Score:', subjectScore);
+    console.log('Behavior:', behavior);
+    console.log('Behavior Score:', behaviorScore);
+    console.log('Comments:', comments);
+}
+
+// Add logic for Detailed Behavior modal
+function viewDetailedBehavior() {
+    document.getElementById("detailedBehaviorModal").style.display = "block";
+}
+// Toggle function for the student profile dropdown
+function toggleStudentInfo() {
+    const studentInfo = document.getElementById('studentInfo');
+    studentInfo.style.display = studentInfo.style.display === 'block' ? 'none' : 'block';
+}
+
+// Toggle function for the student behavior section
+function toggleStudentBehavior() {
+    const studentBehaviorInfo = document.getElementById('studentBehaviorInfo');
+    studentBehaviorInfo.style.display = studentBehaviorInfo.style.display === 'block' ? 'none' : 'block';
+}
+
+// Submit function for student behavior scores
+function submitStudentBehaviorScores() {
+    const respect = document.getElementById('studentRespectScore').value;
+    const responsibility = document.getElementById('studentResponsibilityScore').value;
+    const teamwork = document.getElementById('studentTeamworkScore').value;
+    const agility = document.getElementById('studentAgilityScore').value;
+
+    if (respect && responsibility && teamwork && agility) {
+        alert(`Student Behavior Scores Submitted:
+                Respect: ${respect}, Responsibility: ${responsibility}, Teamwork: ${teamwork}, Agility: ${agility}`);
+    } else {
+        alert('Please fill in all the behavior score fields');
+    }
+}
+
+// Submit function for subject scores and feedback
+function submitSubjectScores() {
+    const studentName = document.getElementById('studentName').value;
+    const studentID = document.getElementById('studentID').value;
+    const grade = document.getElementById('gradeSelect').value;
+    const subject = document.getElementById('subjectSelect').value;
+    const subjectScore = document.getElementById('subjectScore').value;
+    const behaviorScore = document.getElementById('behaviorScore').value;
+    const comments = document.getElementById('comments').value;
+
+    if (studentName && studentID && grade && subject && subjectScore && behaviorScore && comments) {
+        alert(`Subject Score Submitted for ${studentName}:
+                Grade: ${grade}, Subject: ${subject}, Score: ${subjectScore}, Behavior Score: ${behaviorScore}, Comments: ${comments}`);
+    } else {
+        alert('Please fill in all the fields');
+    }
+}
+
+// Toggle function to manage teacher profile visibility
+function toggleTeacherProfile() {
+    const teacherProfile = document.getElementById('teacherProfile');
+    teacherProfile.style.display = teacherProfile.style.display === 'block' ? 'none' : 'block';
+}
+
+// Placeholder for behavior report modal
+function viewDetailedBehavior() {
+    const modal = document.getElementById('detailedBehaviorModal');
+    modal.style.display = 'block';
+}
+
+// Close modal function
+function closeDetailedBehavior() {
+    const modal = document.getElementById('detailedBehaviorModal');
+    modal.style.display = 'none';
+}
+// Function to toggle visibility
+function toggleVisibility(id) {
+    var element = document.getElementById(id);
+    if (element.style.display === "none") {
+        element.style.display = "block";
+    } else {
+        element.style.display = "none";
+    }
+}
+// Function to toggle visibility of the report section
+function toggleVisibility(id) {
+    var element = document.getElementById(id);
+    if (element.style.display === "none") {
+        element.style.display = "block";
+    } else {
+        element.style.display = "none";
+    }
+}
+
+
+// Function to generate the report based on selected options
+function generateReport() {
+    var reportType = document.getElementById('reportType').value;
+    var startDate = document.getElementById('startDate').value;
+    var endDate = document.getElementById('endDate').value;
+    
+    // Here you can modify the code to generate the actual report content based on user input
+    var reportPreview = document.getElementById('reportPreview');
+    reportPreview.innerHTML = `
+        <strong>Report Type:</strong> ${reportType} <br>
+        <strong>Date Range:</strong> ${startDate} to ${endDate} <br>
+        <strong>Report Content:</strong> [Content for ${reportType} from ${startDate} to ${endDate}]`;
+}
+// Function to toggle visibility of the notification section
+function toggleVisibility(id) {
+    var element = document.getElementById(id);
+    if (element.style.display === "none") {
+        element.style.display = "block";
+    } else {
+        element.style.display = "none";
+    }
+}
+
+// Function to add a new notification (simulate notification from admin or principal)
+function addNotification(message) {
+    var notificationsList = document.getElementById('notificationsList');
+    
+    // Create a new list item with the notification message
+    var newNotification = document.createElement('li');
+    newNotification.textContent = message;
+    
+    // Append the new notification to the list
+    notificationsList.appendChild(newNotification);
+}
+
+// Function to clear all notifications
+function clearNotifications() {
+    var notificationsList = document.getElementById('notificationsList');
+    
+    // Clear all existing notifications in the list
+    notificationsList.innerHTML = '';
+    notificationsList.innerHTML = '<li>No new notifications</li>';
+}
+function handleNotificationClick() {
+    const notificationPanel = document.getElementById('notification-panel');
+    notificationPanel.classList.toggle('show');
+    checkForNotifications();
+}
+function togglePerformance() {
+    const performanceSection = document.getElementById("performanceInfo");
+    performanceSection.style.display = performanceSection.style.display === "none" || performanceSection.style.display === "" ? "block" : "none";
+
+    // Mock data for subject performances
+    const subjectPerformances = [
+        { subject: "Math", score: 95 },
+        { subject: "Science", score: 78 },
+        { subject: "English", score: 60 },
+        { subject: "History", score: 85 },
+        { subject: "Art", score: 45 }
+    ];
+
+    const lowPerforming = subjectPerformances.filter(subject => subject.score < 50);
+    const averagePerforming = subjectPerformances.filter(subject => subject.score >= 50 && subject.score < 75);
+    const highPerforming = subjectPerformances.filter(subject => subject.score >= 75);
+
+    document.getElementById("lowPerforming").innerHTML = lowPerforming.map(subject => `<li>${subject.subject}: ${subject.score}%</li>`).join("");
+    document.getElementById("averagePerforming").innerHTML = averagePerforming.map(subject => `<li>${subject.subject}: ${subject.score}%</li>`).join("");
+    document.getElementById("highPerforming").innerHTML = highPerforming.map(subject => `<li>${subject.subject}: ${subject.score}%</li>`).join("");
+}
+
+// Add these sections to your HTML inside the Performance Overview div
+// Simulate new notifications from Admin and Principal
+addNotification("Admin: Please update your weekly report.");
+addNotification("Principal: Meeting scheduled for tomorrow at 10 AM.");
+</script>
+
+</body>
+</html>

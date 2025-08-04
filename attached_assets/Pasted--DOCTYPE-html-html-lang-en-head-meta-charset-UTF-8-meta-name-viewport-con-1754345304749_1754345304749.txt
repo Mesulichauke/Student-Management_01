@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Profile</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        nav h3 {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+
+        nav a {
+            color: #ffcc00;
+            text-decoration: none;
+        }
+
+        .profile-section {
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+        }
+
+        .profile-section h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .dropdown-content.active {
+            display: block;
+        }
+
+        .scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .scoring-table th, .scoring-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .scoring-table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .graph-container {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f1f1f1;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .graph-container:hover {
+            background-color: #e1e1e1;
+        }
+
+        .dropdown-button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-button:hover {
+            background-color: #0056b3;
+        }
+
+        .feedback-form {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-form h3 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .feedback-form textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            resize: none;
+        }
+
+        .feedback-form button {
+            padding: 12px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .feedback-form button:hover {
+            background-color: #218838;
+        }
+
+        .hidden {
+    display: none;
+}
+
+.notification {
+    position: relative;
+}
+
+.dropdown-button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.badge {
+    background-color: red;
+    border-radius: 50%;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+#notificationList {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    padding: 10px;
+    z-index: 100;
+}
+
+#notificationList h3 {
+    margin: 0 0 10px;
+}
+
+#notificationList ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#notificationList li {
+    padding: 5px 0;
+}
+
+        canvas {
+            max-width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Parent Profile</h1>
+        <nav>
+            <h3>Link to Student Profile</h3>
+            <p>If you need to access the student profile, click <a href="student-profile.html">here</a>.</p>
+        </nav>
+    </header>
+
+    <main>
+
+         <!-- Logout Button -->
+    <button id="logout-btn" onclick="logout()" aria-label="Logout">Logout</button>
+
+
+        <div class="notification">
+            <button id="notificationButton" class="dropdown-button">
+                Notifications <span class="badge" id="notificationCount">3</span>
+            </button>
+            <div id="notificationList" class="hidden">
+                <h3>Notifications</h3>
+                <ul>
+                    <li><strong>Subject Alert:</strong> Math - Low performance</li>
+                    <li><strong>School Update:</strong> PTA meeting on Friday</li>
+                    <li><strong>Behavior Alert:</strong> Missing assignments in Science</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="profile-section" onclick="toggleDropdown('personalInfoDropdown')">
+            <h2>Personal Information</h2>
+            <div class="dropdown-content" id="personalInfoDropdown">
+                <p><strong>Parent Name:</strong> Jane Doe</p>
+                <p><strong>Relationship:</strong> Mother</p>
+                <p><strong>Contact:</strong> +1234567890</p>
+                <p><strong>Email:</strong> nnnnn@gng.com</p>
+            </div>
+        </div>
+
+        <div class="profile-section" onclick="toggleDropdown('studentProfileDropdown')">
+            <h2>Student Profile</h2>
+            <div class="dropdown-content" id="studentProfileDropdown">
+                <p><strong>Name:</strong> John Doe</p>
+                <p><strong>Grade:</strong> 10</p>
+                <p><strong>Student ID:</strong> 123456</p>
+                <p><strong>Email:</strong> nnnnn@gng.com</p>
+            </div>
+        </div>
+
+        <div class="feedback-form">
+            <h3>Leave Feedback for Teacher</h3>
+            <label for="feedback">Your Feedback:</label>
+            <textarea id="feedback" required></textarea>
+            <button type="submit">Submit Feedback</button>
+        </div>
+    </main>
+
+    <script>
+
+function toggleVisibility(id) {
+        const element = document.getElementById(id);
+        element.style.display = element.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function logout() {
+        // Redirect to the home page
+        window.location.href = 'index.html'; // Change 'index.html' to your actual home page filename
+    }
+
+        function toggleDropdown(id) {
+            const element = document.getElementById(id);
+            element.classList.toggle('active');
+        }
+
+        document.getElementById("notificationButton").addEventListener("click", function (event) {
+    const notificationList = document.getElementById("notificationList");
+    notificationList.classList.toggle("hidden");
+    event.stopPropagation();  // Prevents the click from closing immediately
+});
+
+document.addEventListener("click", function () {
+    const notificationList = document.getElementById("notificationList");
+    if (!notificationList.classList.contains("hidden")) {
+        notificationList.classList.add("hidden");
+    }
+});
+    </script>
+</body>
+</html>

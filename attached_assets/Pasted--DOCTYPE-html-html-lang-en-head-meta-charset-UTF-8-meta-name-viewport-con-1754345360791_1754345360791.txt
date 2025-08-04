@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Layout */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+
+        /* Main Content Area */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 30px;
+            margin: 20px;
+        }
+
+        .left-column {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .right-column {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .profile-section {
+            margin-bottom: 20px;
+        }
+
+        .profile-section h2 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .dropdown-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            margin-top: 10px;
+        }
+
+        .dropdown-content.active {
+            display: block;
+        }
+
+        /* Table Styling */
+        #teacher-attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #teacher-attendance-table th,
+        #teacher-attendance-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        #teacher-attendance-table th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        #teacher-attendance-table td {
+            background-color: #fff;
+        }
+
+        /* Button Styling */
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .notification {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .notification.success {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .notification.error {
+            background-color: #f44336;
+            color: white;
+        }
+
+        /* Form Input Styling */
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+    </style>
+</head>
+<body onload="checkLogin()">
+    <header>
+        <h1 onclick="toggleDropdown('main-content')">Principal Profile</h1>
+        <nav>
+            <ul>
+                <li><a href="NyikarisanaWebsite.html">Home</a></li>
+                <li><a href="NyikarisanaWebsite.html" onclick="logout()">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Left Column: Profile Info -->
+        <div class="left-column">
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('personal-info-content')">Personal Information</h2>
+                <div id="personal-info-content" class="dropdown-content">
+                    <p><strong>Name:</strong> Jane Doe</p>
+                    <p><strong>Position:</strong> Principal</p>
+                    <p><strong>Contact:</strong> +1234567890</p>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('kpi-overview-content')">KPI Overview</h2>
+                <div id="kpi-overview-content" class="dropdown-content">
+                    <p><strong>Overall School Performance Rating:</strong> 4.7/5</p>
+                    <p><strong>Student Satisfaction:</strong> 90%</p>
+                    <p><strong>Teacher Satisfaction:</strong> 85%</p>
+                    <p><strong>Attendance Rate:</strong> 95%</p>
+                    <button class="btn" id="alertButton" onclick="checkTeacherUpdates()">Check Teacher Updates</button>
+                    <div id="alertMessage" style="display: none;" class="notification error">
+                        Alert: A teacher has not updated their work recently!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Reports, Leadership, Budget -->
+        <div class="right-column">
+            <!-- Leadership Ratings Section -->
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('leadership-ratings-content')">Leadership Ratings</h2>
+                <div id="leadership-ratings-content" class="dropdown-content">
+                    <label for="sgb-score">Rate SGB Leadership:</label>
+                    <select id="sgb-score">
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <button class="btn" type="button" onclick="submitLeadershipScore('sgb')">Submit SGB Score</button>
+
+                    <label for="hod-score">Rate HOD Leadership:</label>
+                    <select id="hod-score">
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <button class="btn" type="button" onclick="submitLeadershipScore('hod')">Submit HOD Score</button>
+
+                    <label for="teacher-score">Rate Teacher Leadership:</label>
+                    <select id="teacher-score">
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <button class="btn" type="button" onclick="submitLeadershipScore('teacher')">Submit Teacher Score</button>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('reports-content')">Reports</h2>
+                <div id="reports-content" class="dropdown-content">
+                    <form id="report-form">
+                        <h3>Submit a Report</h3>
+                        <label for="report-type">Select Report Type:</label>
+                        <select id="report-type">
+                            <option value="weekly">Weekly Report</option>
+                            <option value="monthly">Monthly Report</option>
+                            <option value="term">Term Report</option>
+                        </select>
+                        <textarea id="report-content" rows="4" cols="50" placeholder="Write your report here..."></textarea>
+                        <button class="btn" type="button" onclick="submitReport()">Submit Report</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Budget Report Section -->
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('budget-report-content')">Budget Report</h2>
+                <div id="budget-report-content" class="dropdown-content">
+                    <form id="budget-form">
+                        <h3>Budget Allocation</h3>
+                        <label for="allocation-item">Item:</label>
+                        <input type="text" id="allocation-item" placeholder="Item name">
+                        <label for="allocation-amount">Amount (USD):</label>
+                        <input type="number" id="allocation-amount" placeholder="Amount">
+                        <button class="btn" type="button" onclick="submitBudget()">Submit Budget</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        function checkLogin() {
+            if (!localStorage.getItem('loggedIn')) {
+                alert('Please log in first!');
+                window.location.href = 'login.html'; // Redirect to login page if not logged in
+            }
+        }
+
+        // Toggle visibility of dropdown sections
+        function toggleDropdown(sectionId) {
+            var content = document.getElementById(sectionId);
+            content.classList.toggle('active');
+        }
+
+        // Handle Teacher Updates Alert
+        function checkTeacherUpdates() {
+            var alertMessage = document.getElementById("alertMessage");
+            alertMessage.style.display = "block";
+        }
+
+        // Submit Leadership Scores
+        function submitLeadershipScore(type) {
+            var score = document.getElementById(`${type}-score`).value;
+            alert(`${type.toUpperCase()} Leadership score submitted: ${score}`);
+        }
+
+        // Submit Report Form
+        function submitReport() {
+            var reportType = document.getElementById("report-type").value;
+            var reportContent = document.getElementById("report-content").value;
+            alert(`Report submitted: ${reportType} - ${reportContent}`);
+        }
+
+        // Submit Budget Form
+        function submitBudget() {
+            var item = document.getElementById("allocation-item").value;
+            var amount = document.getElementById("allocation-amount").value;
+            alert(`Budget submitted: ${item} - ${amount}`);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('loggedIn'); // Remove login status from local storage
+            alert("You have logged out!");
+            window.location.href = 'login.html'; // Redirect to login page
+        }
+    </script>
+</body>
+</html>
