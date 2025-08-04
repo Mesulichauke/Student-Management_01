@@ -409,5 +409,23 @@
     <!-- Scripts -->
     <script type="module" src="firebase-config.js"></script>
     <script type="module" src="student-dashboard.js"></script>
+    
+    <!-- Logout Function -->
+    <script type="module">
+        import { signOut } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+        import { auth } from './firebase-config.js';
+        
+        // Global logout function
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                alert('Logged out successfully');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('Error logging out. Please try again.');
+            }
+        };
+    </script>
 </body>
 </html>
