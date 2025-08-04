@@ -268,6 +268,120 @@
                 </div>
             </div>
 
+            <!-- Teacher Performance Management Section -->
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('teacher-performance-content')">Teacher Performance Management</h2>
+                <div id="teacher-performance-content" class="dropdown-content">
+                    
+                    <!-- Overall Teacher Statistics -->
+                    <div class="performance-overview">
+                        <div class="stat-card">
+                            <h4>Average Teacher Rating</h4>
+                            <span class="stat-value">4.1/5.0</span>
+                            <small>Based on all teacher evaluations</small>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Top Performing Teachers</h4>
+                            <span class="stat-value">8/15</span>
+                            <small>Scoring above 4.0</small>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Teachers Needing Support</h4>
+                            <span class="stat-value">2/15</span>
+                            <small>Scoring below 3.5</small>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Parent Satisfaction</h4>
+                            <span class="stat-value">86%</span>
+                            <small>Overall parent approval</small>
+                        </div>
+                    </div>
+
+                    <!-- Individual Teacher Performance -->
+                    <h4>Individual Teacher Performance</h4>
+                    <table class="teacher-performance-table">
+                        <thead>
+                            <tr>
+                                <th>Teacher</th>
+                                <th>Subject</th>
+                                <th>Student Scores</th>
+                                <th>Parent Rating</th>
+                                <th>Meeting Attendance</th>
+                                <th>Overall Score</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Mr. Wilson</td>
+                                <td>Mathematics</td>
+                                <td>78.5% (↑12%)</td>
+                                <td>4.2/5 (28 reviews)</td>
+                                <td>95%</td>
+                                <td class="score-excellent">4.1</td>
+                                <td><span class="status-excellent">Excellent</span></td>
+                            </tr>
+                            <tr>
+                                <td>Ms. Davis</td>
+                                <td>English</td>
+                                <td>82.1% (↑8%)</td>
+                                <td>4.5/5 (35 reviews)</td>
+                                <td>100%</td>
+                                <td class="score-excellent">4.4</td>
+                                <td><span class="status-excellent">Outstanding</span></td>
+                            </tr>
+                            <tr>
+                                <td>Dr. Brown</td>
+                                <td>Science</td>
+                                <td>75.8% (↓2%)</td>
+                                <td>3.9/5 (22 reviews)</td>
+                                <td>88%</td>
+                                <td class="score-good">3.8</td>
+                                <td><span class="status-good">Good</span></td>
+                            </tr>
+                            <tr>
+                                <td>Mr. Johnson</td>
+                                <td>History</td>
+                                <td>68.2% (↓5%)</td>
+                                <td>3.2/5 (18 reviews)</td>
+                                <td>75%</td>
+                                <td class="score-needs-improvement">3.1</td>
+                                <td><span class="status-needs-improvement">Needs Support</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Principal Performance Score -->
+                    <div class="principal-performance">
+                        <h3>Principal Performance Score</h3>
+                        <div class="performance-dashboard">
+                            <div class="main-score">
+                                <span class="score-value">4.0/5.0</span>
+                                <span class="score-label">Strong Leadership</span>
+                            </div>
+                            <div class="score-breakdown">
+                                <div class="breakdown-item">
+                                    <span>Teacher Performance (50%)</span>
+                                    <span class="score">4.1</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span>School Academic Results (30%)</span>
+                                    <span class="score">4.2</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span>Budget Management (15%)</span>
+                                    <span class="score">3.8</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span>Community Relations (5%)</span>
+                                    <span class="score">3.7</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Budget Report Section -->
             <div class="profile-section">
                 <h2 onclick="toggleDropdown('budget-report-content')">Budget Report</h2>
@@ -288,18 +402,19 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
-        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js';
-        import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyDEWMJlZlawvN38v-9QmxOVN22A0slyXNg",
+            apiKey: "AIzaSyD7CpErf98utaNmXfXyJGK_YY9JY0f7jSY",
             authDomain: "nyikarisanawebsite-html.firebaseapp.com",
             projectId: "nyikarisanawebsite-html",
             storageBucket: "nyikarisanawebsite-html.firebasestorage.app",
-            messagingSenderId: "623319986488",
-            appId: "1:623319986488:web:9bb056a1a9e38c68a34f59"
+            messagingSenderId: "454911232732",
+            appId: "1:454911232732:web:84a2540f5f342c06fd8219",
+            measurementId: "G-KN4N9FW2H1"
         };
 
         // Initialize Firebase

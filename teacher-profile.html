@@ -379,9 +379,147 @@
         </div>
 
         <!-- Performance Analytics -->
-        <button class="dropdown-button" onclick="toggleDropdown('analytics-section')">Performance Analytics</button>
+        <button class="dropdown-button" onclick="toggleDropdown('analytics-section')">Performance Analytics & Measurements</button>
         <div id="analytics-section" class="dropdown-content">
-            <h3>Class Performance Overview</h3>
+            
+            <!-- Student Performance Metrics -->
+            <h3>Student Performance Tracking</h3>
+            <div class="performance-metrics">
+                <div class="metric-card">
+                    <h4>Class Average Scores</h4>
+                    <p class="metric-value">78.5%</p>
+                    <small>Mathematics Grade 10A</small>
+                </div>
+                <div class="metric-card">
+                    <h4>Improvement Rate</h4>
+                    <p class="metric-value">+12%</p>
+                    <small>From last quarter</small>
+                </div>
+                <div class="metric-card">
+                    <h4>Pass Rate</h4>
+                    <p class="metric-value">92%</p>
+                    <small>Students passing (≥50%)</small>
+                </div>
+                <div class="metric-card">
+                    <h4>Excellence Rate</h4>
+                    <p class="metric-value">45%</p>
+                    <small>Students scoring ≥80%</small>
+                </div>
+            </div>
+
+            <!-- Parent Feedback Section -->
+            <h3>Parent Feedback & Communication</h3>
+            <div class="feedback-section">
+                <div class="feedback-summary">
+                    <h4>Parent Satisfaction Rating</h4>
+                    <div class="rating-display">
+                        <span class="rating-score">4.2/5.0</span>
+                        <div class="star-rating">
+                            ★★★★☆
+                        </div>
+                        <small>Based on 28 parent responses</small>
+                    </div>
+                </div>
+                
+                <div class="feedback-categories">
+                    <div class="category-score">
+                        <span>Communication Effectiveness</span>
+                        <span class="score">4.1/5</span>
+                    </div>
+                    <div class="category-score">
+                        <span>Teaching Quality</span>
+                        <span class="score">4.3/5</span>
+                    </div>
+                    <div class="category-score">
+                        <span>Student Support</span>
+                        <span class="score">4.0/5</span>
+                    </div>
+                    <div class="category-score">
+                        <span>Homework Management</span>
+                        <span class="score">4.4/5</span>
+                    </div>
+                </div>
+
+                <h4>Recent Parent Comments</h4>
+                <div class="feedback-comments">
+                    <div class="comment">
+                        <p>"Excellent teaching methods and very responsive to questions."</p>
+                        <small>- Parent of Sarah M. (Jan 3, 2025)</small>
+                    </div>
+                    <div class="comment">
+                        <p>"My child has improved significantly in mathematics this term."</p>
+                        <small>- Parent of James K. (Jan 2, 2025)</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- School Meetings & Professional Development -->
+            <h3>Professional Engagement</h3>
+            <div class="engagement-metrics">
+                <div class="meeting-attendance">
+                    <h4>Meeting Attendance</h4>
+                    <div class="attendance-stats">
+                        <div class="stat-item">
+                            <span>Staff Meetings</span>
+                            <span class="attendance-rate">95% (19/20)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Parent-Teacher Conferences</span>
+                            <span class="attendance-rate">100% (28/28)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Professional Development</span>
+                            <span class="attendance-rate">88% (7/8)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Department Meetings</span>
+                            <span class="attendance-rate">92% (11/12)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="professional-contributions">
+                    <h4>Professional Contributions</h4>
+                    <ul>
+                        <li>Led workshop on "Interactive Math Teaching" (Dec 2024)</li>
+                        <li>Mentored 2 new teachers this semester</li>
+                        <li>Contributed to curriculum review committee</li>
+                        <li>Organized inter-class mathematics competition</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Overall Teacher Performance Score -->
+            <div class="overall-performance">
+                <h3>Overall Teacher Performance Score</h3>
+                <div class="performance-dashboard">
+                    <div class="main-score">
+                        <span class="score-value">4.1/5.0</span>
+                        <span class="score-label">Excellent Performance</span>
+                    </div>
+                    <div class="score-breakdown">
+                        <div class="breakdown-item">
+                            <span>Student Achievement (40%)</span>
+                            <span class="score">4.2</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>Parent Satisfaction (30%)</span>
+                            <span class="score">4.2</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>Professional Engagement (20%)</span>
+                            <span class="score">3.9</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>Peer Collaboration (10%)</span>
+                            <span class="score">4.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Charts -->
+            <h3>Performance Trends</h3>
             <div style="width: 100%; height: 400px;">
                 <canvas id="performanceChart"></canvas>
             </div>
