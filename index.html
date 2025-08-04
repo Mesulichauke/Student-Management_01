@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System - Login & Register</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Student Management System</h1>
+            <p>Welcome to our comprehensive educational platform</p>
+        </header>
+
+        <div class="auth-container">
+            <!-- Loading Indicator -->
+            <div id="loading-indicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </div>
+
+            <!-- Error Display -->
+            <div id="form-error" class="error-message hidden"></div>
+
+            <!-- Success Message -->
+            <div id="success-message" class="success-message hidden"></div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="showTab('login')">Login</button>
+                <button class="tab-btn" onclick="showTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-tab" class="tab-content active">
+                <form id="login-form" class="auth-form">
+                    <h2>Login to Your Account</h2>
+                    <div class="form-group">
+                        <input type="email" id="login-email" placeholder="Email Address" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="login-password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Login</button>
+                </form>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="register-tab" class="tab-content">
+                <form id="register-form" class="auth-form">
+                    <h2>Create New Account</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" id="register-firstname" placeholder="First Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="register-lastname" placeholder="Last Name" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" id="register-email" placeholder="Email Address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" id="register-password" placeholder="Password (min 6 characters)" required minlength="6">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" id="register-identity" placeholder="Identity/ID Number" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="tel" id="register-phone" placeholder="Phone Number" required>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea id="register-address" placeholder="Physical Address" required rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <select id="register-role" required>
+                            <option value="">Select Your Role</option>
+                            <option value="Student">Student</option>
+                            <option value="Teacher">Teacher</option>
+                            <option value="Teacher Assistant">Teacher Assistant</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Principal">Principal</option>
+                            <option value="Admin">Admin</option>
+                            <option value="SGB">SGB Member</option>
+                        </select>
+                    </div>
+
+                    <!-- Student-specific fields -->
+                    <div id="student-fields" class="student-fields hidden">
+                        <h3>Student Documents (Required)</h3>
+                        <div class="file-upload-group">
+                            <label for="student-id-copy">ID Copy (PDF, JPG, PNG):</label>
+                            <input type="file" id="student-id-copy" accept=".pdf,.jpg,.jpeg,.png">
+                        </div>
+                        <div class="file-upload-group">
+                            <label for="student-birth-cert">Birth Certificate (PDF, JPG, PNG):</label>
+                            <input type="file" id="student-birth-cert" accept=".pdf,.jpg,.jpeg,.png">
+                        </div>
+                        <div class="file-upload-group">
+                            <label for="student-clinic-card">Clinic Card (PDF, JPG, PNG):</label>
+                            <input type="file" id="student-clinic-card" accept=".pdf,.jpg,.jpeg,.png">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase v10 SDK -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="auth.js"></script>
+
+    <script>
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Clear any error messages
+            hideMessage('form-error');
+            hideMessage('success-message');
+        }
+
+        // Utility functions for showing/hiding messages
+        function showMessage(elementId, message, type = 'error') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = type === 'error' ? 'error-message' : 'success-message';
+            element.classList.remove('hidden');
+        }
+
+        function hideMessage(elementId) {
+            document.getElementById(elementId).classList.add('hidden');
+        }
+
+        function showLoading() {
+            document.getElementById('loading-indicator').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-indicator').classList.add('hidden');
+        }
+
+        // Role change handler
+        document.getElementById('register-role').addEventListener('change', function() {
+            const studentFields = document.getElementById('student-fields');
+            if (this.value === 'Student') {
+                studentFields.classList.remove('hidden');
+                // Make file inputs required for students
+                document.querySelectorAll('#student-fields input[type="file"]').forEach(input => {
+                    input.required = true;
+                });
+            } else {
+                studentFields.classList.add('hidden');
+                // Remove required attribute for non-students
+                document.querySelectorAll('#student-fields input[type="file"]').forEach(input => {
+                    input.required = false;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
