@@ -63,10 +63,11 @@ loginForm.addEventListener('submit', async (e) => {
         
         switch (error.code) {
             case 'auth/user-not-found':
-                errorMessage += 'No account found with this email address.';
+                errorMessage += 'No account found with this email address. Please register first.';
                 break;
             case 'auth/wrong-password':
-                errorMessage += 'Incorrect password.';
+            case 'auth/invalid-credential':
+                errorMessage += 'Incorrect email or password. Please check your credentials.';
                 break;
             case 'auth/invalid-email':
                 errorMessage += 'Invalid email address format.';
@@ -125,17 +126,18 @@ registerForm.addEventListener('submit', async (e) => {
             uid: user.uid
         };
         
-        // Handle student-specific data and file uploads
+        // Handle student-specific data
         if (formData.role === 'Student') {
             userData.studentId = 'STU' + Date.now().toString().slice(-6);
-            
-            // Upload student documents
-            const documentUrls = await uploadStudentDocuments(user.uid);
-            userData.documents = documentUrls;
         }
         
-        // Save user data to Firestore
+        // Save user data to Firestore first (faster)
         await setDoc(doc(db, 'users', user.uid), userData);
+        
+        // Upload student documents in background (if student)
+        if (formData.role === 'Student') {
+            uploadStudentDocumentsInBackground(user.uid);
+        }
         
         showMessage('success-message', 'Registration successful! Redirecting...', 'success');
         
@@ -226,9 +228,28 @@ async function uploadStudentDocuments(uid) {
     return documents;
 }
 
+// Upload student documents in background (non-blocking)
+async function uploadStudentDocumentsInBackground(uid) {
+    try {
+        const documents = await uploadStudentDocuments(uid);
+        
+        // Update user document with file URLs
+        const userDocRef = doc(db, 'users', uid);
+        await setDoc(userDocRef, { documents }, { merge: true });
+        
+        console.log('Student documents uploaded successfully');
+    } catch (error) {
+        console.error('Error uploading student documents:', error);
+        // Don't show error to user since this is background operation
+    }
+}
+
 // Redirect user based on role
 async function redirectUserBasedOnRole(uid) {
     try {
+        // Wait a bit for database write to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         const userDoc = await getDoc(doc(db, 'users', uid));
         
         if (userDoc.exists()) {
@@ -264,14 +285,29 @@ async function redirectUserBasedOnRole(uid) {
                     default:
                         window.location.href = 'dashboard.html';
                 }
-            }, 1500);
+            }, 1000);
         } else {
-            console.error('User document not found');
-            showMessage('form-error', 'User profile not found. Please contact support.');
+            console.error('User document not found, retrying...');
+            // Retry once after a longer delay
+            setTimeout(async () => {
+                try {
+                    const retryDoc = await getDoc(doc(db, 'users', uid));
+                    if (retryDoc.exists()) {
+                        const userData = retryDoc.data();
+                        sessionStorage.setItem('currentUser', JSON.stringify(userData));
+                        window.location.href = userData.role === 'Student' ? 'student-profile.html' : 'dashboard.html';
+                    } else {
+                        showMessage('form-error', 'Registration completed but profile not found. Please try logging in again.');
+                    }
+                } catch (retryError) {
+                    console.error('Retry error:', retryError);
+                    showMessage('form-error', 'Registration completed. Please try logging in manually.');
+                }
+            }, 2000);
         }
     } catch (error) {
         console.error('Error fetching user data:', error);
-        showMessage('form-error', 'Error loading user profile. Please try again.');
+        showMessage('form-error', 'Registration completed. Please try logging in manually.');
     }
 }
 
