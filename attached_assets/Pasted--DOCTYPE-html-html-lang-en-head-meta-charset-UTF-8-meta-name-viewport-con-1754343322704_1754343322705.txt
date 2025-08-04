@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile System</title>
+   
+    <!-- Logout Button -->
+    <button id="logout-btn" onclick="logout()" aria-label="Logout">Logout</button>
+
+    <style>
+
+#logout-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;   
+    transition: background-color 0.3s ease;
+}
+
+#logout-btn:hover {
+    background-color: #c82333;
+}
+
+      /* Notification Button Styling */
+#notificationButton {
+    position: fixed; /* Fix the button position relative to the viewport */
+    top: 10px; /* Distance from the top */
+    right: 10px; /* Distance from the right */
+    background-color: #007bff; /* Button color */
+    color: white; /* Text color */
+    border: none; /* Remove border */
+    padding: 10px 15px; /* Padding for the button */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    z-index: 1000; /* Ensure it is above other elements */
+}
+
+/* Hover Effect for Notification Button */
+#notificationButton:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Notification Section Styling */
+#notificationSection {
+    position: fixed; /* Fix position */
+    top: 50px; /* Below the button */
+    right: 10px; /* Align with the button */
+    background-color: #fff; /* Background color */
+    width: 300px; /* Set width */
+    max-height: 400px; /* Limit the height */
+    overflow-y: auto; /* Add scroll if content exceeds height */
+    border: 1px solid #ddd; /* Border around the section */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+    z-index: 999; /* Above other elements */
+    padding: 15px;
+    display: none; /* Initially hidden */
+}
+
+#notificationsList ul {
+    list-style-type: none;
+    padding-left: 15px; /* Add padding to align content properly */
+}
+
+#notificationsList li {
+    background-color: #f9f9f9;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+#notificationsList li strong {
+    font-weight: bold;
+}
+
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .button {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .button:hover {
+            background-color: #444;
+        }
+        .content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .editable {
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 4px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .profile-header h1 {
+            margin: 0;
+        }
+        .section-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        canvas {
+            width: 100%;
+            height: 400px;
+        }
+        .feedback-form input, .feedback-form textarea, .feedback-form select {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .feedback-form button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .feedback-form button:hover {
+            background-color: #0056b3;
+        }
+        .feedback-list {
+            margin-top: 20px;
+        }
+        .feedback-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feedback-list li {
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Student Profile Header -->
+    <div class="profile-header">
+        <div>
+            <h1>Student Profile</h1>
+            <p>ID: 12345 | Grade: 10</p>
+        </div>
+    </div>
+
+    <!-- Notifications Button -->
+<button class="button" onclick="toggleVisibility('notificationSection')">Notifications</button>
+
+<!-- Notification Section -->
+<div id="notificationSection" class="content" style="display:none;">
+    <h2>Notifications</h2>
+    <div id="notificationsList">
+        <ul>
+            <li><strong>Admin:</strong> School holiday announced for next week.</li>
+            <li><strong>Teacher:</strong> Remember to submit your assignments by Friday.</li>
+            <li><strong>Principal:</strong> Parent-teacher meeting scheduled for next month.</li>
+        </ul>
+    </div>
+</div>
+
+
+    <!-- Personal Information Button -->
+    <button class="button" onclick="toggleVisibility('personalInfo')">Personal Information</button>
+    <div id="personalInfo" class="content" style="display:none;">
+        <p>Name: John Doe</p>
+        <p>Age: 16</p>
+        <p>Address: 123 Main Street, City, Country</p>
+        <p>Phone: +1234567890</p>
+    </div>
+
+    <!-- Parent Information Button -->
+    <button class="button" onclick="toggleVisibility('parentInfo')">Parent Information</button>
+    <div id="parentInfo" class="content" style="display:none;">
+        <p>Name: Jane Doe</p>
+        <p>Phone: +0987654321</p>
+        <p>Email: jane.doe@example.com</p>
+    </div>
+
+    <!-- Performance Overview Button -->
+    <button class="button" onclick="toggleVisibility('performanceOverview')">Performance Overview</button>
+    <div id="performanceOverview" class="content" style="display:none;">
+        <p>Overall Grade: 85%</p>
+        <p>Strengths: Science, Mathematics</p>
+        <p>Weaknesses: English, History</p>
+    </div>
+
+    <!-- Low-Performing Subjects Alerts -->
+    <div class="content">
+        <button class="button" onclick="toggleVisibility('lowPerformingSubjects')">Low-Performing Subjects</button>
+        <div id="lowPerformingSubjects" style="display:none;">
+            <p>English: 60%</p>
+            <p>History: 65%</p>
+        </div>
+    </div>
+
+    <!-- Behavior Report -->
+    <div class="content">
+        <button class="button" onclick="toggleVisibility('behaviorReport')">Behavior Report</button>
+        <div id="behaviorReport" style="display:none;">
+            <p>Respect: Excellent</p>
+            <p>Responsibility: Good</p>
+            <p>Teamwork: Average</p>
+        </div>
+    </div>
+
+    <!-- Attendance -->
+    <div class="content">
+        <button class="button" onclick="toggleVisibility('attendanceReport')">Attendance</button>
+        <div id="attendanceReport" style="display:none;">
+            <p>Present: 90%</p>
+            <p>Absent: 10%</p>
+        </div>
+    </div>
+
+    <!-- Show More Button for Detailed Performance, Behavior, and Attendance -->
+    <button class="button" onclick="toggleVisibility('detailedInfo')">Show More</button>
+    <div id="detailedInfo" class="content" style="display:none;">
+        <h3>Performance, Behavior, and Attendance Breakdown</h3>
+
+        <!-- Performance Breakdown -->
+        <div>
+            <h4>Performance Overview</h4>
+            <button class="button" onclick="toggleVisibility('performanceWeekly')">Weekly Performance</button>
+            <div id="performanceWeekly" style="display:none;">
+                <p>Week 1: 75%</p>
+                <p>Week 2: 85%</p>
+                <p>Week 3: 90%</p>
+            </div>
+            <button class="button" onclick="toggleVisibility('performanceMonthly')">Monthly Performance</button>
+            <div id="performanceMonthly" style="display:none;">
+                <p>January: 80%</p>
+                <p>February: 85%</p>
+                <p>March: 90%</p>
+            </div>
+            <button class="button" onclick="toggleVisibility('performanceTerm')">Term Performance</button>
+            <div id="performanceTerm" style="display:none;">
+                <p>Term 1: 82%</p>
+                <p>Term 2: 86%</p>
+                <p>Term 3: 90%</p>
+            </div>
+        </div>
+
+        <!-- Behavior Breakdown -->
+        <div>
+            <h4>Behavior Overview</h4>
+            <button class="button" onclick="toggleVisibility('behaviorWeekly')">Weekly Behavior</button>
+            <div id="behaviorWeekly" style="display:none;">
+                <p>Week 1: Good</p>
+                <p>Week 2: Excellent</p>
+                <p>Week 3: Average</p>
+            </div>
+            <button class="button" onclick="toggleVisibility('behaviorMonthly')">Monthly Behavior</button>
+            <div id="behaviorMonthly" style="display:none;">
+                <p>January: Good</p>
+                <p>February: Excellent</p>
+                <p>March: Average</p>
+            </div>
+            <button class="button" onclick="toggleVisibility('behaviorTerm')">Term Behavior</button>
+            <div id="behaviorTerm" style="display:none;">
+                <p>Term 1: Excellent</p>
+                <p>Term 2: Good</p>
+                <p>Term 3: Average</p>
+            </div>
+        </div>
+
+        <!-- Attendance Breakdown -->
+        <div>
+            <h4>Attendance Overview</h4>
+            <button class="button" onclick="toggleVisibility('attendanceWeekly')">Weekly Attendance</button>
+            <div id="attendanceWeekly" style="display:none;">
+                <p>Week 1: 95%</p>
+                <p>Week 2: 90%</p>
+                <p>Week 3: 85%</p>
+            </div>
+            <button class="button" onclick="toggleVisibility('attendanceMonthly')">Monthly Attendance</button>
+            <div id="attendanceMonthly" style="display:none;">
+                <p>January: 92%</p>
+                <p>February: 90%</p>
+                <p>March: 88%</p>
+            </div>
+            <button class="button" onclick="toggleVisibility('attendanceTerm')">Term Attendance</button>
+            <div id="attendanceTerm" style="display:none;">
+                <p>Term 1: 94%</p>
+                <p>Term 2: 91%</p>
+                <p>Term 3: 89%</p>
+            </div>
+        </div>
+
+          <!-- Generate Report Button -->
+<button class="button" onclick="generateReport()">Generate Report</button>
+    
+    <!-- Report Section -->
+    <div id="reportSection" style="display:none;">
+        <h4>Student Summary Report</h4>
+        <p id="reportContent"></p>
+    </div>
+</div>
+</div>
+
+
+<!-- Feedback Button -->
+<button class="button" onclick="toggleVisibility('feedbackFormSection')">Give Feedback</button>
+    
+<!-- Feedback Section (Form) -->
+<div id="feedbackFormSection" class="content" style="display:none;">
+    <h2>Feedback</h2>
+    <form class="feedback-form" id="feedbackForm">
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" required>
+
+        <label for="teacherName">Teacher's Name:</label>
+        <input type="text" id="teacherName" required>
+
+        <label for="message">Your Feedback:</label>
+        <textarea id="message" required></textarea>
+
+        <label for="behaviorRating">Behavior:</label>
+        <select id="behaviorRating" required>
+            <option value="Excellent">Excellent</option>
+            <option value="Good">Good</option>
+            <option value="Average">Average</option>
+            <option value="Below Average">Below Average</option>
+            <option value="Poor">Poor</option>
+        </select>
+
+        <label for="performanceRating">Performance:</label>
+        <select id="performanceRating" required>
+            <option value="Excellent">Excellent</option>
+            <option value="Good">Good</option>
+            <option value="Average">Average</option>
+            <option value="Below Average">Below Average</option>
+            <option value="Poor">Poor</option>
+        </select>
+
+        <label for="attendanceRating">Attendance:</label>
+        <select id="attendanceRating" required>
+            <option value="Excellent">Excellent</option>
+            <option value="Good">Good</option>
+            <option value="Average">Average</option>
+            <option value="Below Average">Below Average</option>
+            <option value="Poor">Poor</option>
+        </select>
+
+        <button type="submit">Submit Feedback</button>
+    </form>
+</div>
+
+<!-- Feedback List -->
+<div class="feedback-list" id="feedbackList">
+    <h3>Previous Feedback</h3>
+    <ul id="feedbackItems">
+        <!-- Feedback items will be added here -->
+    </ul>
+</div>
+
+</div>
+
+<script>
+
+function toggleVisibility(id) {
+        const element = document.getElementById(id);
+        element.style.display = element.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function logout() {
+        // Redirect to the home page
+        window.location.href = 'index.html'; // Change 'index.html' to your actual home page filename
+    }
+
+function generateReport() {
+    // Sample data for the report, you can replace this with dynamic data if needed
+    const performance = "85% (Overall Grade: Excellent)";
+    const behavior = "Good (Consistency in behavior)";
+    const attendance = "90% (High attendance rate)";
+
+    // Combine all data into a report string
+    const reportContent = `
+        <strong>Performance:</strong> ${performance}<br>
+        <strong>Behavior:</strong> ${behavior}<br>
+        <strong>Attendance:</strong> ${attendance}
+    `;
+
+    // Show the generated report
+    document.getElementById('reportContent').innerHTML = reportContent;
+    document.getElementById('reportSection').style.display = 'block';  // Make the report section visible
+}
+
+    // Feedback form submission
+document.getElementById("feedbackForm").onsubmit = function(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const teacherName = document.getElementById('teacherName').value;
+    const message = document.getElementById('message').value;
+    const behaviorRating = document.getElementById('behaviorRating').value;
+    const performanceRating = document.getElementById('performanceRating').value;
+    const attendanceRating = document.getElementById('attendanceRating').value;
+
+    // Add the feedback to the list
+    const feedbackItem = document.createElement('li');
+    feedbackItem.innerHTML = `<strong>${name}</strong> rated <strong>${teacherName}</strong>:<br>
+    Message: ${message}<br>
+    Behavior: ${behaviorRating}<br>
+    Performance: ${performanceRating}<br>
+    Attendance: ${attendanceRating}<br>`;
+
+    // Append the new feedback item to the list
+    document.getElementById('feedbackItems').appendChild(feedbackItem);
+
+    // Clear the form after submission
+    document.getElementById('feedbackForm').reset();
+};
+
+// Function to toggle the visibility of sections
+function toggleVisibility(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section.style.display === 'none' || section.style.display === '') {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+    }
+}
+
+    // Toggle visibility for sections
+    function toggleVisibility(sectionId) {
+        const section = document.getElementById(sectionId);
+        section.style.display = (section.style.display === 'none' || section.style.display === '') ? 'block' : 'none';
+    }
+
+function generateReport() {
+        // Sample data for the report, you can replace this with dynamic data if needed
+        const performance = "85% (Overall Grade: Excellent)";
+        const behavior = "Good (Consistency in behavior)";
+        const attendance = "90% (High attendance rate)";
+
+        // Combine all data into a report string
+        const reportContent = `
+            <strong>Performance:</strong> ${performance}<br>
+            <strong>Behavior:</strong> ${behavior}<br>
+            <strong>Attendance:</strong> ${attendance}
+        `;
+
+        // Show the generated report
+        document.getElementById('reportContent').innerHTML = reportContent;
+        document.getElementById('reportSection').style.display = 'block';
+    }
+
+      // Feedback form submission
+      document.getElementById("feedbackForm").onsubmit = function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const teacherName = document.getElementById('teacherName').value;
+        const message = document.getElementById('message').value;
+        const behaviorRating = document.getElementById('behaviorRating').value;
+        const performanceRating = document.getElementById('performanceRating').value;
+        const attendanceRating = document.getElementById('attendanceRating').value;
+
+         // Add the feedback to the list
+    const feedbackItem = document.createElement('li');
+    feedbackItem.innerHTML = `<strong>${name}</strong> rated <strong>${teacherName}</strong>:<br>
+    Message: ${message}<br>
+    Behavior: ${behaviorRating}<br>
+    Performance: ${performanceRating}<br>
+    Attendance: ${attendanceRating}`;
+
+    // Append the new feedback item to the feedback list
+    document.getElementById('feedbackItems').appendChild(feedbackItem);
+
+    // Clear the form fields after submission
+    document.getElementById('feedbackForm').reset();
+
+    // Close the feedback form
+    document.getElementById('feedbackFormSection').style.display = 'none';
+};
+
+    function toggleVisibility(id) {
+        const element = document.getElementById(id);
+        if (element.style.display === "none") {
+            element.style.display = "block";
+        } else {
+            element.style.display = "none";
+        }
+    }
+
+    // Function to toggle visibility of any section
+    function toggleVisibility(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+
+const validateFileType = (file) => allowedTypes.includes(file.type);
+
+if (!validateFileType(idCopy) || !validateFileType(birthCert) || !validateFileType(clinicCard)) {
+  showError('Files must be PDF or image formats.');
+  return;
+}
+
+
+}
+</script>
+
+</body>
+</html>                  

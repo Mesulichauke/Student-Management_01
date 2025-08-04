@@ -1,0 +1,147 @@
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+document.getElementById('register-role').addEventListener('change', function () {
+  document.getElementById('student-fields').style.display = this.value === 'Student' ? 'block' : 'none';
+});
+
+document.getElementById('register-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById('register-email').value.trim();
+  const password = document.getElementById('register-password').value.trim();
+  const identity = document.getElementById('register-identity').value.trim();
+  const phone = document.getElementById('register-phone').value.trim();
+  const address = document.getElementById('register-address').value.trim();
+  const role = document.getElementById('register-role').value;
+
+  if (!email || !password || !identity || !phone || !address || !role) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+  
+
+  if (role === 'Student') {
+    const idCopy = document.getElementById('student-id-copy').files[0];
+    const birthCert = document.getElementById('student-birth-cert').files[0];
+    const clinicCard = document.getElementById('student-clinic-card').files[0];
+    if (!idCopy || !birthCert || !clinicCard) {
+      alert('Please upload all required student documents.');
+      return;
+    }
+  }
+
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = userCredential.user.uid;
+
+    const userData = {
+      email,
+      identity,
+      phone,
+      address,
+      role,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (role === 'Student') {
+      userData.studentId = 'STU' + Date.now().toString().slice(-6);
+
+      // Helper to upload file and get URL
+      const uploadFile = async (file, path) => {
+        const ref = storage.ref(path);
+        await ref.put(file);
+        return await ref.getDownloadURL();
+      };
+
+      userData.idCopyURL = await uploadFile(document.getElementById('student-id-copy').files[0], `students/${uid}/idCopy`);
+      userData.birthCertURL = await uploadFile(document.getElementById('student-birth-cert').files[0], `students/${uid}/birthCert`);
+      userData.clinicCardURL = await uploadFile(document.getElementById('student-clinic-card').files[0], `students/${uid}/clinicCard`);
+    }
+
+    await db.collection('users').doc(uid).set(userData);
+
+    alert('Registration successful!');
+    this.reset();
+    document.getElementById('student-fields').style.display = 'none';
+
+  } catch (error) {
+    show('Error during registration: ' + error.message);
+  }
+
+});
+
+document.getElementById('login-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+
+  if (!email || !password) {
+    alert('Please enter email and password.');
+    return;
+  }
+  document.getElementById('loading-indicator').style.display = 'block';
+// Inside finally or after completion
+document.getElementById('loading-indicator').style.display = 'none';
+
+
+
+  function showError(message) {
+  const errorDiv = document.getElementById('form-error');
+  errorDiv.textContent = message;
+  errorDiv.style.display = 'block';
+}
+
+if (role === 'Student') {
+  window.location.href = 'student-profile.html';
+}
+
+
+
+
+  try {
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const uid = userCredential.user.uid;
+
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      alert('User data not found.');
+      return;
+    }
+
+    const userData = userDoc.data();
+
+    alert('Login successful! Redirecting...');
+
+    switch (userData.role) {
+      case 'Student':
+        window.location.href = 'student-profile.html';
+        break;
+      case 'Teacher':
+        window.location.href = 'teacher-profile.html';
+        break;
+      case 'Parent':
+        window.location.href = 'parent-profile.html';
+        break;
+      case 'Teacher Assistant':
+        window.location.href = 'teacher-assistant-profile.html';
+        break;
+      case 'Principal':
+        window.location.href = 'principal-profile.html';
+        break;
+      case 'Admin':
+        window.location.href = 'admin-profile.html';
+        break;
+      case 'SGB':
+        window.location.href = 'sgb-profile.html';
+        break;
+      default:
+        window.location.href = 'dashboard.html';
+    }
+
+  } catch (error) {
+    alert('Login failed: ' + error.message);
+  }
+});
