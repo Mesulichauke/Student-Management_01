@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Layout */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+
+        /* Main Content Area */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 30px;
+            margin: 20px;
+        }
+
+        .left-column {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .right-column {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .profile-section {
+            margin-bottom: 20px;
+        }
+
+        .profile-section h2 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .dropdown-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            margin-top: 10px;
+        }
+
+        .dropdown-content.active {
+            display: block;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        table td {
+            background-color: #fff;
+        }
+
+        /* Button Styling */
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .notification {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .notification.success {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .notification.error {
+            background-color: #f44336;
+            color: white;
+        }
+
+        /* Form Input Styling */
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Principal Profile</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Left Column: Profile Info -->
+        <div class="left-column">
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('personal-info-content')">Personal Information</h2>
+                <div id="personal-info-content" class="dropdown-content">
+                    <p><strong>Name:</strong> <span id="principal-name" class="loading">Loading...</span></p>
+                    <p><strong>Position:</strong> Principal</p>
+                    <p><strong>Email:</strong> <span id="principal-email" class="loading">Loading...</span></p>
+                    <p><strong>Contact:</strong> <span id="principal-contact">+1234567890</span></p>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('kpi-overview-content')">KPI Overview</h2>
+                <div id="kpi-overview-content" class="dropdown-content">
+                    <p><strong>Overall School Performance Rating:</strong> 4.7/5</p>
+                    <p><strong>Student Satisfaction:</strong> 90%</p>
+                    <p><strong>Teacher Satisfaction:</strong> 85%</p>
+                    <p><strong>Attendance Rate:</strong> 95%</p>
+                    <button class="btn" id="alertButton" onclick="checkTeacherUpdates()">Check Teacher Updates</button>
+                    <div id="alertMessage" style="display: none;" class="notification error">
+                        Alert: A teacher has not updated their work recently!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Reports, Leadership, Budget -->
+        <div class="right-column">
+            <!-- Leadership Ratings Section -->
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('leadership-ratings-content')">Leadership Ratings</h2>
+                <div id="leadership-ratings-content" class="dropdown-content">
+                    <label for="sgb-score">Rate SGB Leadership:</label>
+                    <select id="sgb-score">
+                        <option value="">Select Rating</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <button class="btn" type="button" onclick="submitLeadershipScore('sgb')">Submit SGB Score</button>
+
+                    <label for="hod-score">Rate HOD Leadership:</label>
+                    <select id="hod-score">
+                        <option value="">Select Rating</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <button class="btn" type="button" onclick="submitLeadershipScore('hod')">Submit HOD Score</button>
+
+                    <label for="teacher-score">Rate Teacher Leadership:</label>
+                    <select id="teacher-score">
+                        <option value="">Select Rating</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <button class="btn" type="button" onclick="submitLeadershipScore('teacher')">Submit Teacher Score</button>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('reports-content')">Reports</h2>
+                <div id="reports-content" class="dropdown-content">
+                    <form id="report-form">
+                        <h3>Submit a Report</h3>
+                        <label for="report-type">Select Report Type:</label>
+                        <select id="report-type">
+                            <option value="weekly">Weekly Report</option>
+                            <option value="monthly">Monthly Report</option>
+                            <option value="term">Term Report</option>
+                        </select>
+                        <textarea id="report-content" rows="4" cols="50" placeholder="Write your report here..."></textarea>
+                        <button class="btn" type="button" onclick="submitReport()">Submit Report</button>
+                    </form>
+                    <div id="report-status" class="notification" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Budget Report Section -->
+            <div class="profile-section">
+                <h2 onclick="toggleDropdown('budget-report-content')">Budget Report</h2>
+                <div id="budget-report-content" class="dropdown-content">
+                    <form id="budget-form">
+                        <h3>Budget Allocation</h3>
+                        <label for="allocation-item">Item:</label>
+                        <input type="text" id="allocation-item" placeholder="Item name">
+                        <label for="allocation-amount">Amount (USD):</label>
+                        <input type="number" id="allocation-amount" placeholder="Amount">
+                        <button class="btn" type="button" onclick="submitBudget()">Submit Budget</button>
+                    </form>
+                    <div id="budget-status" class="notification" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEWMJlZlawvN38v-9QmxOVN22A0slyXNg",
+            authDomain: "nyikarisanawebsite-html.firebaseapp.com",
+            projectId: "nyikarisanawebsite-html",
+            storageBucket: "nyikarisanawebsite-html.firebasestorage.app",
+            messagingSenderId: "623319986488",
+            appId: "1:623319986488:web:9bb056a1a9e38c68a34f59"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check authentication and role
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        if (userData.role !== 'Principal') {
+                            alert('Access denied. Principal role required.');
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        loadPrincipalData(userData, user);
+                    } else {
+                        alert('User profile not found.');
+                        window.location.href = 'index.html';
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    alert('Error loading profile. Please try again.');
+                }
+            } else {
+                alert('Please log in first.');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Load principal data
+        function loadPrincipalData(userData, user) {
+            document.getElementById('principal-name').textContent = userData.fullName || 'Not provided';
+            document.getElementById('principal-email').textContent = user.email;
+            
+            // Update contact if available
+            if (userData.phone) {
+                document.getElementById('principal-contact').textContent = userData.phone;
+            }
+        }
+
+        // Global functions for HTML onclick handlers
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                alert('Logged out successfully');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('Error logging out. Please try again.');
+            }
+        };
+
+        window.toggleDropdown = function(sectionId) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('active');
+        };
+
+        window.checkTeacherUpdates = function() {
+            const alertMessage = document.getElementById("alertMessage");
+            alertMessage.style.display = "block";
+            setTimeout(() => {
+                alertMessage.style.display = "none";
+            }, 5000);
+        };
+
+        window.submitLeadershipScore = async function(type) {
+            const score = document.getElementById(`${type}-score`).value;
+            if (!score) {
+                alert('Please select a rating.');
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    const ratingData = {
+                        ratingType: type,
+                        score: parseInt(score),
+                        ratedBy: user.uid,
+                        timestamp: new Date(),
+                        raterRole: 'Principal'
+                    };
+
+                    await setDoc(doc(db, 'leadershipRatings', `${type}_${Date.now()}`), ratingData);
+                    alert(`${type.toUpperCase()} Leadership score submitted: ${score}/5`);
+                    document.getElementById(`${type}-score`).value = '';
+                }
+            } catch (error) {
+                console.error('Error submitting rating:', error);
+                alert('Error submitting rating. Please try again.');
+            }
+        };
+
+        window.submitReport = async function() {
+            const reportType = document.getElementById("report-type").value;
+            const reportContent = document.getElementById("report-content").value;
+            const statusDiv = document.getElementById("report-status");
+
+            if (!reportContent.trim()) {
+                alert('Please enter report content.');
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    const reportData = {
+                        type: reportType,
+                        content: reportContent,
+                        submittedBy: user.uid,
+                        submitterRole: 'Principal',
+                        timestamp: new Date(),
+                        status: 'submitted'
+                    };
+
+                    await setDoc(doc(db, 'reports', `principal_${Date.now()}`), reportData);
+                    
+                    statusDiv.textContent = `${reportType} report submitted successfully!`;
+                    statusDiv.className = 'notification success';
+                    statusDiv.style.display = 'block';
+                    
+                    // Clear form
+                    document.getElementById("report-content").value = '';
+                    
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error submitting report:', error);
+                statusDiv.textContent = 'Error submitting report. Please try again.';
+                statusDiv.className = 'notification error';
+                statusDiv.style.display = 'block';
+            }
+        };
+
+        window.submitBudget = async function() {
+            const item = document.getElementById("allocation-item").value;
+            const amount = document.getElementById("allocation-amount").value;
+            const statusDiv = document.getElementById("budget-status");
+
+            if (!item.trim() || !amount) {
+                alert('Please fill in both item and amount.');
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    const budgetData = {
+                        item: item,
+                        amount: parseFloat(amount),
+                        allocatedBy: user.uid,
+                        allocatorRole: 'Principal',
+                        timestamp: new Date(),
+                        status: 'allocated'
+                    };
+
+                    await setDoc(doc(db, 'budgetAllocations', `budget_${Date.now()}`), budgetData);
+                    
+                    statusDiv.textContent = `Budget allocated: ${item} - $${amount}`;
+                    statusDiv.className = 'notification success';
+                    statusDiv.style.display = 'block';
+                    
+                    // Clear form
+                    document.getElementById("allocation-item").value = '';
+                    document.getElementById("allocation-amount").value = '';
+                    
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error submitting budget:', error);
+                statusDiv.textContent = 'Error submitting budget allocation. Please try again.';
+                statusDiv.className = 'notification error';
+                statusDiv.style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>

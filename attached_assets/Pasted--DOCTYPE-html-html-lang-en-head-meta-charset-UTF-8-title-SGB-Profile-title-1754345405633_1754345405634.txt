@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SGB Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Include Chart.js if needed -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    
+    <style>
+
+#logout-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;   
+    transition: background-color 0.3s ease;
+}
+
+#logout-btn:hover {
+    background-color: #c82333;
+}
+
+       /* General Reset for Body */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    min-height: 100vh;
+}lor: #333;
+}
+
+header {
+    background-color: #2e86de;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+h1, h2, h3, h4 {
+    color: #2e86de;
+    margin-top: 0;
+}
+
+p {
+    line-height: 1.6;
+}
+
+/* Container Styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.profile-section {
+    margin-bottom: 30px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+/* Buttons */
+button, .dropdown-button, .attendance-btn, .notification-btn {
+    background-color: #2e86de;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+    transition: background-color 0.3s;
+}
+
+button:hover, .dropdown-button:hover, .attendance-btn:hover, .notification-btn:hover {
+    background-color: #1b4f72;
+}
+
+/* Dropdown Content */
+.dropdown-content {
+    display: none;
+    margin-top: 20px;
+}
+
+.dropdown-content.active {
+    display: block;
+}
+
+/* Forms */
+form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+form input, form select, form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+/* Notification Panel */
+.notification-dropdown {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.notification-dropdown h3 {
+    margin-top: 0;
+}
+
+#notification-list li {
+    list-style: none;
+    margin-bottom: 10px;
+}
+
+/* Profile Links */
+.profile-links a {
+    color: #2e86de;
+    text-decoration: none;
+}
+
+.profile-links a:hover {
+    text-decoration: underline;
+}
+
+/* Attendance Section */
+.attendance-register, .attendance-records {
+    margin-top: 20px;
+}
+
+.attendance-register h3, .attendance-records h4 {
+    margin-top: 0;
+}
+
+/* Budget Section */
+#budget-report h3 {
+    margin-top: 0;
+}
+
+/* Leadership Ratings */
+#leadership-output {
+    margin-top: 20px;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    header, .container {
+        padding: 15px;
+    }
+
+    button, .dropdown-button, .attendance-btn, .notification-btn {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    form input, form select, form textarea {
+        font-size: 16px;
+    }
+
+    table th, table td {
+        padding: 8px;
+    }
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SGB Profile</h1>
+    </header>
+    <!-- Begin Container -->
+    <div class="container">
+        <main>
+            <!-- Welcome Message & Notification Button -->
+            <div class="alert">
+                <p>Welcome, SGB Member!</p>
+                  <!-- Notification Button -->
+<button id="notify-btn">Notifications</button>
+
+  <!-- Notification Panel -->
+  <div id="notification-panel" class="notification-panel" style="display: none;">
+    <ul id="notification-list"></ul>
+     <!-- Profile Results Example -->
+    <div id="profile-results">
+        <h3>Student A Profile</h3>
+        <p>Performance: <span id="student-performance">40</span></p>
+        <p>Attendance: <span id="student-attendance">75</span>%</p>
+    </div>
+
+    <div id="teacher-results">
+        <h3>Teacher X Profile</h3>
+        <p>Performance (based on student pass rates): <span id="teacher-performance">45</span></p>
+        <p>Attendance: <span id="teacher-attendance">85</span>%</p>
+    </div>
+</div>
+</div>
+</div>
+
+   
+
+
+            <!-- Pull Reports Section -->
+            <div class="profile-section">
+                <button class="dropdown-btn" data-target="report-pull-section">Pull Reports</button>
+                <div id="report-pull-section" class="dropdown-content">
+                    <div id="profile-selection">
+                        <h2>Select a Profile to Pull a Report</h2>
+                        <label for="profile-dropdown">Choose a Profile:</label>
+                        <select id="profile-dropdown">
+                            <option value="">Select Profile</option>
+                            <option value="sgb">SGB</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="student">Student</option>
+                            <option value="parent">Parent</option>
+                            <option value="administrator">Administrator</option>
+                            <option value="principal">Principal</option>
+                        </select>
+                        <button type="button" id="pull-report-btn">Pull Report</button>
+                    </div>
+                    <div id="report-output" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+
+            <!-- Personal Info Section -->
+            <div class="profile-section">
+                <button class="dropdown-btn" data-target="personal-info">Personal Information</button>
+                <div id="personal-info" class="dropdown-content">
+                    <h2>Personal Information</h2>
+                    <p><strong>Name:</strong> John Smith</p>
+                    <p><strong>Position:</strong> SGB Chairperson</p>
+                    <p><strong>Contact:</strong> +1234567890</p>
+                </div>
+            </div>
+
+            <!-- Performance Overview Section -->
+            <div class="profile-section">
+                <button class="dropdown-btn" data-target="performance">Performance Overview</button>
+                <div id="performance" class="dropdown-content">
+                    <h2>Performance Overview</h2>
+                    <p><strong>Overall Performance Rating:</strong> 4.5/5</p>
+                    <p><strong>Areas of Strength:</strong> Leadership, Communication</p>
+                    <p><strong>Areas for Improvement:</strong> Financial Management</p>
+                </div>
+            </div>
+
+            <!-- Monitoring School Operations Section -->
+            <div class="profile-section">
+                <button class="dropdown-btn" data-target="monitoring-aspects">Monitoring School Operations</button>
+                <div id="monitoring-aspects" class="dropdown-content">
+                    <!-- Attendance Section -->
+                    <button id="view-attendance-btn" class="attendance-btn">View Attendance Records ▼</button>
+                    <div id="attendance-dropdown" class="dropdown-menu" style="display: none;">
+                        <button id="student-attendance-btn">Student Attendance</button>
+                        <button id="teacher-attendance-btn">Teacher Attendance</button>
+                        <button id="sgb-attendance-btn">SGB Attendance</button>
+                        <button id="attendance-history-btn">Attendance History</button>
+                        <div id="attendance-output"></div>
+                        <div id="history-output"></div>
+                    </div>
+
+                    <!-- Attendance Register -->
+                    <div class="attendance-register">
+                        <button id="attendance-register-btn" class="dropdown-button">Attendance Register</button>
+                        <div class="dropdown-content" id="attendanceInfo" style="display: none;">
+                            <label for="attendanceDate">Date:</label>
+                            <input type="date" id="attendanceDate" required>
+                            <label for="attendanceStatus">Status:</label>
+                            <select id="attendanceStatus" required>
+                                <option value="">Select status</option>
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                                <option value="Late">Late</option>
+                            </select>
+                            <button id="submit-attendance-btn">Submit Attendance</button>
+                        </div>
+
+                        <div id="attendanceHistory">
+                            <h3>Attendance History</h3>
+                            <table id="attendanceHistoryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Attendance records will appear here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Budget Management Section -->
+                    <h3>Budget Management</h3>
+                    <button type="button" id="view-budget-report-btn">View Budget Report</button>
+                    <div id="budget-report" class="dropdown-content" style="display: none;">
+                        <h3>Enter Budget Details</h3>
+                        <form id="budgetForm">
+                            <label for="category">Budget Category:</label>
+                            <input type="text" id="category" name="category" required><br><br>
+                            <label for="amount">Budget Amount:</label>
+                            <input type="number" id="amount" name="amount" required><br><br>
+                            <label for="description">Description:</label>
+                            <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+                            <button type="submit">Submit Budget</button>
+                        </form>
+
+                        <table id="budgetTable">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Budget entries will be displayed here dynamically -->
+                            </tbody>
+                        </table>
+
+                        <h3>Budget Breakdown History</h3>
+                        <table class="budget-history-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody id="budgetHistoryTable">
+                                <!-- History entries will be displayed here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leadership Ratings Section -->
+            <div class="profile-section">
+                <button id="leadership-ratings-btn">Leadership Ratings</button>
+                <div id="leadership-output"></div>
+                <div id="leadership-dropdown" class="dropdown-content" style="display: none;">
+                    <label for="sgb-score">Rate SGB Leadership:</label>
+                    <select id="sgb-score">
+                        <option value="">Select Rating</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <button type="button" id="submit-sgb-score-btn">Submit SGB Score</button>
+
+                    <label for="hod-score">Rate HOD Leadership:</label>
+                    <select id="hod-score">
+                        <option value="">Select Rating</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                    <button type="button" id="submit-hod-score-btn">Submit HOD Score</button>
+                </div>
+            </div>
+        </main>
+    </div><!-- Logout Button -->
+    <button id="logout-btn" onclick="logout()" aria-label="Logout">Logout</button>
+    <!-- End Container -->
+    <script src="app.js"></script>
+</body>
+</html>
+<script>
+
+function logout() {
+        // Redirect to the home page
+        window.location.href = 'index.html'; // Change 'index.html' to your actual home page filename
+    }
+    // Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Notification Button
+    const notifyBtn = document.getElementById('notify-btn');
+    if (notifyBtn) {
+        notifyBtn.addEventListener('click', handleNotificationClick);
+    }
+    function handleNotificationClick() {
+    const notificationPanel = document.getElementById('notification-panel');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+
+    if (notificationPanel.style.display === 'block') {
+        // Close the notification panel
+        notificationPanel.style.display = 'none';
+        notificationDropdown.style.display = 'none';
+    } else {
+        // Open the notification panel and refresh notifications
+        notificationPanel.style.display = 'block';
+        checkForNotifications();
+    }
+}
+
+    // Close Notification Panel Button
+    const closeNotificationBtn = document.getElementById('close-notification-btn');
+    if (closeNotificationBtn) {
+        closeNotificationBtn.addEventListener('click', toggleNotificationPanel);
+    }
+
+    // Dropdown Buttons
+    const dropdownButtons = document.querySelectorAll('.dropdown-btn');
+    dropdownButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            const targetId = button.getAttribute('data-target');
+            toggleDropdown(targetId);
+        });
+    });
+
+    // Attendance Register Button
+    const attendanceRegisterBtn = document.getElementById('attendance-register-btn');
+    if (attendanceRegisterBtn) {
+        attendanceRegisterBtn.addEventListener('click', toggleAttendanceForm);
+    }
+
+    // Submit Attendance Button
+    const submitAttendanceBtn = document.getElementById('submit-attendance-btn');
+    if (submitAttendanceBtn) {
+        submitAttendanceBtn.addEventListener('click', submitAttendance);
+    }
+
+    // Attendance Buttons
+    document.getElementById('view-attendance-btn').addEventListener('click', toggleAttendanceDropdown);
+    document.getElementById('student-attendance-btn').addEventListener('click', function() {
+        showAttendance('student');
+    });
+    document.getElementById('teacher-attendance-btn').addEventListener('click', function() {
+        showAttendance('teacher');
+    });
+    document.getElementById('sgb-attendance-btn').addEventListener('click', function() {
+        showAttendance('sgb');
+    });
+    document.getElementById('attendance-history-btn').addEventListener('click', showAttendanceHistory);
+
+    // Leadership Ratings Button
+    document.getElementById('leadership-ratings-btn').addEventListener('click', showLeadershipRatings);
+
+    // Submit Leadership Scores
+    document.getElementById('submit-sgb-score-btn').addEventListener('click', function() {
+        submitLeadershipScore('sgb');
+    });
+
+    // Function to toggle the display of the leadership ratings section
+    function toggleLeadershipRatings() {
+        const leadershipOutput = document.getElementById('leadership-output');
+        
+        if (leadershipOutput.style.display === 'none' || leadershipOutput.style.display === '') {
+            // Show the leadership ratings content
+            leadershipOutput.style.display = 'block';
+        } else {
+            // Hide the leadership ratings content
+            leadershipOutput.style.display = 'none';
+        }
+    }
+
+    document.getElementById('submit-hod-score-btn').addEventListener('click', function() {
+        submitLeadershipScore('hod');
+    });
+
+    // Pull Report Button
+    document.getElementById('pull-report-btn').addEventListener('click', pullReport);
+
+    // Budget Report Button
+    document.getElementById('view-budget-report-btn').addEventListener('click', toggleBudgetReport);
+
+    // Budget Form Submission
+    document.getElementById('budgetForm').addEventListener('submit', handleBudgetFormSubmit);
+});
+
+// Toggle Dropdown Content
+function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    if (dropdown) {
+        dropdown.classList.toggle('active');
+    }
+}
+
+// Toggle Notification Panel and Check for Notifications
+function handleNotificationClick() {
+    const notificationPanel = document.getElementById('notification-panel');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+
+    if (notificationPanel.style.display === 'block') {
+        // Hide the notification panel
+        notificationPanel.style.display = 'none';
+        notificationDropdown.style.display = 'none'; // Hide dropdown when panel is closed
+    } else {
+        // Show the notification panel and refresh notifications
+        notificationPanel.style.display = 'block';
+        checkForNotifications();
+    }
+}
+
+// Toggle Notification Panel
+function toggleNotificationPanel() {
+    const notificationPanel = document.getElementById('notification-panel');
+    if (notificationPanel.style.display === 'block') {
+        notificationPanel.style.display = 'none';
+    } else {
+        notificationPanel.style.display = 'block';
+    }
+}
+
+// Handle Notification Click
+function handleNotificationClick() {
+    toggleNotificationPanel();
+    checkForNotifications();
+}
+
+// Check for Notifications
+function checkForNotifications() {
+    const dropdown = document.getElementById('notification-dropdown');
+    const notificationList = document.getElementById('notification-list');
+    notificationList.innerHTML = "";
+
+    const studentPerformance = parseInt(document.getElementById('student-performance').textContent);
+    const studentAttendance = parseInt(document.getElementById('student-attendance').textContent);
+    const teacherPerformance = parseInt(document.getElementById('teacher-performance').textContent);
+    const teacherAttendance = parseInt(document.getElementById('teacher-attendance').textContent);
+
+    let hasIrregularities = false;
+
+    if (studentPerformance < 50) {
+        hasIrregularities = true;
+        notificationList.appendChild(createNotification("Student A has low performance (below 50%)."));
+    }
+
+    if (studentAttendance < 80) {
+        hasIrregularities = true;
+        notificationList.appendChild(createNotification("Student A has low attendance (below 80%)."));
+    }
+
+    if (teacherPerformance < 50) {
+        hasIrregularities = true;
+        notificationList.appendChild(createNotification("Teacher X has low performance (below 50%)."));
+    }
+
+    if (teacherAttendance < 80) {
+        hasIrregularities = true;
+        notificationList.appendChild(createNotification("Teacher X has low attendance (below 80%)."));
+    }
+
+    if (hasIrregularities) {
+        dropdown.style.display = 'block';
+    } else {
+        dropdown.style.display = 'none';
+    }
+}
+
+// Create Notification List Item
+function createNotification(message) {
+    const notification = document.createElement("li");
+    notification.textContent = message;
+    return notification;
+}
+
+// Toggle Attendance Form
+function toggleAttendanceForm() {
+    const attendanceInfo = document.getElementById("attendanceInfo");
+    attendanceInfo.style.display = attendanceInfo.style.display === "none" || attendanceInfo.style.display === '' ? "block" : "none";
+}
+
+// Submit Attendance
+function submitAttendance() {
+    const date = document.getElementById("attendanceDate").value;
+    const status = document.getElementById("attendanceStatus").value;
+
+    if (date && status) {
+        const tbody = document.querySelector("#attendanceHistoryTable tbody");
+        const newRow = tbody.insertRow();
+        newRow.innerHTML = `<td>${date}</td><td>${status}</td>`;
+
+        // Clear the form fields
+        document.getElementById("attendanceDate").value = "";
+        document.getElementById("attendanceStatus").value = "";
+    } else {
+        alert("Please fill in both the date and status.");
+    }
+}
+
+// Toggle Attendance Dropdown
+function toggleAttendanceDropdown() {
+    const dropdown = document.getElementById('attendance-dropdown');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Show Attendance Records
+function showAttendance(profileType) {
+    const attendanceSection = document.getElementById('attendance-output');
+    attendanceSection.innerHTML = `<p>Loading ${profileType} attendance records...</p>`;
+
+    // Simulate fetching attendance records
+    setTimeout(() => {
+        const sampleData = `
+            <h4>${capitalizeFirstLetter(profileType)} Attendance Records</h4>
+            <table>
+                <thead><tr><th>Name</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr><td>John Doe</td><td>${new Date().toLocaleDateString()}</td><td>Present</td></tr>
+                </tbody>
+            </table>
+        `;
+        attendanceSection.innerHTML = sampleData;
+    }, 500);
+}
+
+// Show Attendance History
+function showAttendanceHistory() {
+    const historySection = document.getElementById('history-output');
+    historySection.innerHTML = '<p>Loading attendance history...</p>';
+
+    setTimeout(() => {
+        historySection.innerHTML = `
+            <h4>Attendance History</h4>
+            <p>Details of attendance history will be shown here.</p>
+        `;
+    }, 500);
+}
+
+// Show Leadership Ratings
+function showLeadershipRatings() {
+    const leadershipSection = document.getElementById('leadership-output');
+    leadershipSection.innerHTML = '<p>Loading leadership ratings...</p>';
+
+    setTimeout(() => {
+        leadershipSection.innerHTML = `
+            <h4>Current Leadership Ratings</h4>
+            <table>
+                <thead><tr><th>Leader</th><th>Role</th><th>Rating</th></tr></thead>
+                <tbody>
+                    <tr><td>Mr. John Smith</td><td>SGB Chairperson</td><td>4.5/5</td></tr>
+                    <tr><td>Ms. Jane Doe</td><td>HOD</td><td>4.8/5</td></tr>
+                </tbody>
+            </table>
+        `;
+    }, 500);
+}
+
+// Submit Leadership Score
+function submitLeadershipScore(type) {
+    const scoreElement = document.getElementById(`${type}-score`);
+    const score = scoreElement.value;
+    if (score) {
+        alert(`Score for ${type.toUpperCase()}: ${score}`);
+        // Reset the selection
+        scoreElement.value = "";
+    } else {
+        alert('Please enter a valid score.');
+    }
+}
+
+// Pull Report
+function pullReport() {
+    const selectedProfile = document.getElementById('profile-dropdown').value;
+    const output = document.getElementById('report-output');
+    output.innerHTML = selectedProfile ? `<p>Pulling report for ${capitalizeFirstLetter(selectedProfile)}...</p>` : "<p>Please select a profile.</p>";
+}
+
+// Toggle Budget Report
+function toggleBudgetReport() {
+    const budgetReport = document.getElementById('budget-report');
+    budgetReport.style.display = budgetReport.style.display === 'none' || budgetReport.style.display === '' ? 'block' : 'none';
+}
+
+// Handle Budget Form Submission
+function handleBudgetFormSubmit(event) {
+    event.preventDefault();
+    const category = document.getElementById('category').value;
+    const amount = document.getElementById('amount').value;
+    const description = document.getElementById('description').value;
+
+    if (category && amount && description) {
+        const tbody = document.querySelector('#budgetTable tbody');
+        const historyTbody = document.getElementById('budgetHistoryTable');
+        const currentDate = new Date().toLocaleDateString();
+
+        // Add new budget entry
+        const newBudgetRow = tbody.insertRow();
+        newBudgetRow.innerHTML = `<td>${category}</td><td>${amount}</td><td>${description}</td>`;
+
+        // Add to history
+        const newHistoryRow = historyTbody.insertRow();
+        newHistoryRow.innerHTML = `<td>${currentDate}</td><td>${category}</td><td>${amount}</td><td>${description}</td>`;
+
+        // Clear the form fields
+        document.getElementById('category').value = '';
+        document.getElementById('amount').value = '';
+        document.getElementById('description').value = '';
+    } else {
+        alert('Please fill out all fields.');
+    }
+}
+
+// Utility Function to Capitalize First Letter
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+</script>
