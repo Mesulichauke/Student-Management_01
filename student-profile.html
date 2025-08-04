@@ -406,26 +406,42 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="student-dashboard.js"></script>
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
     
-    <!-- Logout Function -->
-    <script type="module">
-        import { signOut } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
-        import { auth } from './firebase-config.js';
-        
+    <!-- Global Logout Function -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7CpErf98utaNmXfXyJGK_YY9JY0f7jSY",
+            authDomain: "nyikarisanawebsite-html.firebaseapp.com",
+            projectId: "nyikarisanawebsite-html",
+            storageBucket: "nyikarisanawebsite-html.firebasestorage.app",
+            messagingSenderId: "454911232732",
+            appId: "1:454911232732:web:84a2540f5f342c06fd8219",
+            measurementId: "G-KN4N9FW2H1"
+        };
+
+        // Initialize Firebase with compat version
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
         // Global logout function
-        window.logout = async function() {
-            try {
-                await signOut(auth);
+        function logout() {
+            auth.signOut().then(() => {
                 alert('Logged out successfully');
                 window.location.href = 'index.html';
-            } catch (error) {
+            }).catch((error) => {
                 console.error('Error logging out:', error);
                 alert('Error logging out. Please try again.');
-            }
-        };
+            });
+        }
     </script>
+    
+    <!-- Module Scripts -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="student-dashboard.js"></script>
 </body>
 </html>
