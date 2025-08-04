@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGB Registration Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>SGB Registration Test</h1>
+        <p>This page will test SGB registration with detailed error reporting.</p>
+        
+        <div id="status"></div>
+        
+        <form id="sgb-test-form">
+            <div class="form-group">
+                <label for="test-firstname">First Name:</label>
+                <input type="text" id="test-firstname" value="John" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-lastname">Last Name:</label>
+                <input type="text" id="test-lastname" value="Smith" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-email">Email:</label>
+                <input type="email" id="test-email" value="john.smith.sgb@test.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-password">Password:</label>
+                <input type="password" id="test-password" value="password123" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-identity">Identity Number:</label>
+                <input type="text" id="test-identity" value="8001015009087" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-phone">Phone:</label>
+                <input type="tel" id="test-phone" value="+27123456789" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-address">Address:</label>
+                <textarea id="test-address" required>123 Test Street, Test City, 1234</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-role">Role:</label>
+                <select id="test-role" required>
+                    <option value="SGB">SGB Member</option>
+                </select>
+            </div>
+            
+            <button type="submit">Test SGB Registration</button>
+        </form>
+        
+        <div id="debug-info" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword,
+            onAuthStateChanged
+        } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc,
+            serverTimestamp 
+        } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7CpErf98utaNmXfXyJGK_YY9JY0f7jSY",
+            authDomain: "nyikarisanawebsite-html.firebaseapp.com",
+            projectId: "nyikarisanawebsite-html",
+            storageBucket: "nyikarisanawebsite-html.firebasestorage.app",
+            messagingSenderId: "454911232732",
+            appId: "1:454911232732:web:84a2540f5f342c06fd8219",
+            measurementId: "G-KN4N9FW2H1"
+        };
+
+        let debugLog = [];
+        
+        function addDebugLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push(`[${timestamp}] ${message}`);
+            document.getElementById('debug-info').innerHTML = debugLog.join('<br>');
+            console.log(message);
+        }
+        
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = type;
+            statusDiv.innerHTML = message;
+        }
+
+        try {
+            addDebugLog('Initializing Firebase...');
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            addDebugLog('Firebase initialized successfully');
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    addDebugLog(`User authenticated: ${user.uid}`);
+                    addDebugLog(`User email: ${user.email}`);
+                } else {
+                    addDebugLog('No user authenticated');
+                }
+            });
+
+            document.getElementById('sgb-test-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    firstName: document.getElementById('test-firstname').value.trim(),
+                    lastName: document.getElementById('test-lastname').value.trim(),
+                    email: document.getElementById('test-email').value.trim(),
+                    password: document.getElementById('test-password').value.trim(),
+                    identity: document.getElementById('test-identity').value.trim(),
+                    phone: document.getElementById('test-phone').value.trim(),
+                    address: document.getElementById('test-address').value.trim(),
+                    role: document.getElementById('test-role').value
+                };
+
+                addDebugLog('Starting SGB registration test...');
+                addDebugLog(`Email: ${formData.email}`);
+                addDebugLog(`Role: ${formData.role}`);
+                
+                showStatus('Testing registration...', 'loading');
+
+                try {
+                    addDebugLog('Creating user with Firebase Auth...');
+                    const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+                    const user = userCredential.user;
+                    addDebugLog(`User created successfully: ${user.uid}`);
+
+                    const userData = {
+                        firstName: formData.firstName,
+                        lastName: formData.lastName,
+                        fullName: `${formData.firstName} ${formData.lastName}`,
+                        email: formData.email,
+                        identity: formData.identity,
+                        phone: formData.phone,
+                        address: formData.address,
+                        role: formData.role,
+                        createdAt: serverTimestamp(),
+                        uid: user.uid
+                    };
+
+                    addDebugLog('Saving user data to Firestore...');
+                    await setDoc(doc(db, 'users', user.uid), userData);
+                    addDebugLog('User data saved successfully');
+                    
+                    showStatus('✅ SGB Registration completed successfully!', 'success');
+                    addDebugLog('Registration test completed successfully');
+                    
+                } catch (error) {
+                    addDebugLog(`ERROR: ${error.code} - ${error.message}`);
+                    showStatus(`❌ Registration failed: ${error.message}`, 'error');
+                    
+                    // Detailed error analysis
+                    if (error.code === 'auth/email-already-in-use') {
+                        addDebugLog('This email is already registered. Try a different email.');
+                    } else if (error.code === 'auth/weak-password') {
+                        addDebugLog('Password is too weak. Use at least 6 characters.');
+                    } else if (error.code === 'auth/invalid-email') {
+                        addDebugLog('Email format is invalid.');
+                    } else if (error.code === 'auth/network-request-failed') {
+                        addDebugLog('Network error - check internet connection.');
+                    } else {
+                        addDebugLog(`Unexpected error: ${error.code}`);
+                    }
+                }
+            });
+
+        } catch (error) {
+            addDebugLog(`INITIALIZATION ERROR: ${error.message}`);
+            showStatus(`❌ Firebase initialization failed: ${error.message}`, 'error');
+        }
+    </script>
+</body>
+</html>
