@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network & Firebase Status Check</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .status-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #ccc;
+        }
+        .status-success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .status-warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        .status-info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .code {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <h1>Network & Firebase Status Check</h1>
+        <p>This page will help diagnose connection issues with Firebase authentication.</p>
+        
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearResults()">Clear Results</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+        
+        function addResult(title, message, status = 'info') {
+            const div = document.createElement('div');
+            div.className = `status-item status-${status}`;
+            div.innerHTML = `<strong>${title}:</strong> ${message}`;
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            results.innerHTML = '';
+        }
+        
+        async function runAllTests() {
+            clearResults();
+            addResult('Test Started', 'Running network and Firebase connectivity tests...', 'info');
+            
+            // Test 1: Basic connectivity
+            if (navigator.onLine) {
+                addResult('Internet Connection', 'Browser reports online status: ✓ Connected', 'success');
+            } else {
+                addResult('Internet Connection', '⚠️ Browser reports offline status', 'warning');
+            }
+            
+            // Test 2: DNS Resolution
+            try {
+                const start = Date.now();
+                await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-cache' });
+                const duration = Date.now() - start;
+                addResult('DNS Resolution', `✓ Google.com reachable (${duration}ms)`, 'success');
+            } catch (error) {
+                addResult('DNS Resolution', `❌ Cannot reach Google.com: ${error.message}`, 'error');
+            }
+            
+            // Test 3: Firebase Services Availability
+            try {
+                const start = Date.now();
+                await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=test', { 
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                const duration = Date.now() - start;
+                addResult('Firebase Auth Service', `✓ Firebase Auth endpoint reachable (${duration}ms)`, 'success');
+            } catch (error) {
+                if (error.message.includes('400')) {
+                    addResult('Firebase Auth Service', '✓ Firebase Auth service is responding (400 expected for invalid request)', 'success');
+                } else {
+                    addResult('Firebase Auth Service', `⚠️ Firebase Auth connectivity issue: ${error.message}`, 'warning');
+                }
+            }
+            
+            // Test 4: Firebase Configuration Test
+            try {
+                const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js');
+                const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js');
+                
+                const firebaseConfig = {
+                    apiKey: "AIzaSyD7CpErf98utaNmXfXyJGK_YY9JY0f7jSY",
+                    authDomain: "nyikarisanawebsite-html.firebaseapp.com",
+                    projectId: "nyikarisanawebsite-html",
+                    storageBucket: "nyikarisanawebsite-html.firebasestorage.app",
+                    messagingSenderId: "454911232732",
+                    appId: "1:454911232732:web:84a2540f5f342c06fd8219",
+                    measurementId: "G-KN4N9FW2H1"
+                };
+                
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                
+                addResult('Firebase Initialization', '✓ Firebase SDK loaded and initialized successfully', 'success');
+                addResult('Firebase Config', `Project ID: <span class="code">${firebaseConfig.projectId}</span>`, 'info');
+                addResult('Firebase Config', `Auth Domain: <span class="code">${firebaseConfig.authDomain}</span>`, 'info');
+                
+            } catch (error) {
+                addResult('Firebase Initialization', `❌ Failed to initialize Firebase: ${error.message}`, 'error');
+            }
+            
+            // Test 5: CORS and Network Policies
+            try {
+                const response = await fetch('https://nyikarisanawebsite-html.firebaseapp.com/__/auth/handler', { 
+                    mode: 'no-cors',
+                    cache: 'no-cache'
+                });
+                addResult('Firebase Project Access', '✓ Firebase project domain accessible', 'success');
+            } catch (error) {
+                addResult('Firebase Project Access', `⚠️ Project access test: ${error.message}`, 'warning');
+            }
+            
+            // Test 6: Browser Security Settings
+            const isSecureContext = window.isSecureContext;
+            const protocol = window.location.protocol;
+            
+            if (isSecureContext || protocol === 'http:') {
+                addResult('Security Context', `✓ Running in ${protocol} ${isSecureContext ? '(secure)' : '(local dev)'}`, 'success');
+            } else {
+                addResult('Security Context', '⚠️ Insecure context may cause Firebase issues', 'warning');
+            }
+            
+            // Test 7: User Agent and Browser Info
+            const userAgent = navigator.userAgent;
+            addResult('Browser Info', `${navigator.userAgent.slice(0, 100)}...`, 'info');
+            
+            // Test 8: Network timing (if available)
+            if ('connection' in navigator) {
+                const connection = navigator.connection;
+                addResult('Network Info', `Type: ${connection.effectiveType || 'unknown'}, Downlink: ${connection.downlink || 'unknown'} Mbps`, 'info');
+            }
+            
+            addResult('Test Complete', 'All network and Firebase tests completed. Check results above for any issues.', 'success');
+        }
+    </script>
+</body>
+</html>

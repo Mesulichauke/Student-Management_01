@@ -34,7 +34,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Login form handler
+// Login form handler with improved network error handling
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -49,8 +49,36 @@ loginForm.addEventListener('submit', async (e) => {
     showLoading();
     hideMessage('form-error');
     
+    // Check internet connectivity
+    if (!navigator.onLine) {
+        showMessage('form-error', 'No internet connection. Please check your network and try again.');
+        hideLoading();
+        return;
+    }
+    
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        // Add retry logic for network issues
+        let retryCount = 0;
+        const maxRetries = 3;
+        let userCredential;
+        
+        while (retryCount < maxRetries) {
+            try {
+                userCredential = await signInWithEmailAndPassword(auth, email, password);
+                break; // Success, exit retry loop
+            } catch (networkError) {
+                if (networkError.code === 'auth/network-request-failed' && retryCount < maxRetries - 1) {
+                    retryCount++;
+                    console.log(`Network error during login, retrying... (${retryCount}/${maxRetries})`);
+                    // Wait before retrying (exponential backoff)
+                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                    continue;
+                } else {
+                    throw networkError; // Re-throw if not a network error or max retries reached
+                }
+            }
+        }
+        
         const user = userCredential.user;
         
         showMessage('success-message', 'Login successful! Redirecting...', 'success');
@@ -75,8 +103,11 @@ loginForm.addEventListener('submit', async (e) => {
             case 'auth/too-many-requests':
                 errorMessage += 'Too many failed attempts. Please try again later.';
                 break;
+            case 'auth/network-request-failed':
+                errorMessage += 'Network connection failed. Please check your internet connection and try again.';
+                break;
             default:
-                errorMessage += error.message;
+                errorMessage += `${error.message} (Code: ${error.code})`;
         }
         
         showMessage('form-error', errorMessage);
@@ -85,7 +116,7 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Registration form handler
+// Registration form handler with improved error handling
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -108,15 +139,44 @@ registerForm.addEventListener('submit', async (e) => {
     showLoading();
     hideMessage('form-error');
     
+    // Check internet connectivity
+    if (!navigator.onLine) {
+        showMessage('form-error', 'No internet connection. Please check your network and try again.');
+        hideLoading();
+        return;
+    }
+    
     try {
-        // Create user account
-        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        // Add retry logic for network issues
+        let retryCount = 0;
+        const maxRetries = 3;
+        let userCredential;
+        
+        while (retryCount < maxRetries) {
+            try {
+                // Create user account
+                userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+                break; // Success, exit retry loop
+            } catch (networkError) {
+                if (networkError.code === 'auth/network-request-failed' && retryCount < maxRetries - 1) {
+                    retryCount++;
+                    console.log(`Network error, retrying... (${retryCount}/${maxRetries})`);
+                    // Wait before retrying (exponential backoff)
+                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                    continue;
+                } else {
+                    throw networkError; // Re-throw if not a network error or max retries reached
+                }
+            }
+        }
+        
         const user = userCredential.user;
         
         // Prepare user data
         const userData = {
             firstName: formData.firstName,
             lastName: formData.lastName,
+            fullName: `${formData.firstName} ${formData.lastName}`,
             email: formData.email,
             identity: formData.identity,
             phone: formData.phone,
@@ -131,8 +191,23 @@ registerForm.addEventListener('submit', async (e) => {
             userData.studentId = 'STU' + Date.now().toString().slice(-6);
         }
         
-        // Save user data to Firestore first (faster)
-        await setDoc(doc(db, 'users', user.uid), userData);
+        // Save user data to Firestore with retry logic
+        let saveRetryCount = 0;
+        while (saveRetryCount < maxRetries) {
+            try {
+                await setDoc(doc(db, 'users', user.uid), userData);
+                break; // Success
+            } catch (saveError) {
+                if (saveError.code === 'unavailable' && saveRetryCount < maxRetries - 1) {
+                    saveRetryCount++;
+                    console.log(`Firestore save error, retrying... (${saveRetryCount}/${maxRetries})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000 * saveRetryCount));
+                    continue;
+                } else {
+                    throw saveError;
+                }
+            }
+        }
         
         // Upload student documents in background (if student)
         if (formData.role === 'Student') {
@@ -153,16 +228,25 @@ registerForm.addEventListener('submit', async (e) => {
         
         switch (error.code) {
             case 'auth/email-already-in-use':
-                errorMessage += 'An account with this email already exists.';
+                errorMessage += 'An account with this email already exists. Please use a different email or try logging in.';
                 break;
             case 'auth/weak-password':
-                errorMessage += 'Password is too weak. Please choose a stronger password.';
+                errorMessage += 'Password is too weak. Please choose a stronger password (at least 6 characters).';
                 break;
             case 'auth/invalid-email':
-                errorMessage += 'Invalid email address format.';
+                errorMessage += 'Invalid email address format. Please check your email.';
+                break;
+            case 'auth/network-request-failed':
+                errorMessage += 'Network connection failed. Please check your internet connection and try again.';
+                break;
+            case 'auth/too-many-requests':
+                errorMessage += 'Too many registration attempts. Please wait a few minutes and try again.';
+                break;
+            case 'unavailable':
+                errorMessage += 'Service temporarily unavailable. Please try again in a few moments.';
                 break;
             default:
-                errorMessage += error.message;
+                errorMessage += `${error.message} (Code: ${error.code})`;
         }
         
         showMessage('form-error', errorMessage);

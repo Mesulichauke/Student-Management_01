@@ -1,8 +1,8 @@
-// Firebase v10 Configuration
+// Firebase v10 Configuration with improved error handling
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
-import { getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
-import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
-import { getStorage } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js';
+import { getAuth, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+import { getFirestore, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+import { getStorage, connectStorageEmulator } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -16,14 +16,41 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app;
+let auth;
+let db;
+let storage;
 
-// Initialize Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+try {
+    app = initializeApp(firebaseConfig);
+    
+    // Initialize Firebase services with error handling
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+    
+    // Set auth settings for better reliability
+    auth.settings = {
+        appVerificationDisabledForTesting: false
+    };
+    
+    console.log('Firebase initialized successfully');
+} catch (error) {
+    console.error('Firebase initialization error:', error);
+    // Fallback initialization attempt
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        storage = getStorage(app);
+        console.log('Firebase initialized on retry');
+    } catch (retryError) {
+        console.error('Firebase retry initialization failed:', retryError);
+    }
+}
+
+// Export Firebase services
+export { auth, db, storage };
 
 // Export the app instance for other modules
 export default app;
-
-console.log('Firebase initialized successfully');
