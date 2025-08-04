@@ -283,7 +283,8 @@ async function redirectUserBasedOnRole(uid) {
                         window.location.href = 'sgb-profile.html';
                         break;
                     default:
-                        window.location.href = 'dashboard.html';
+                        console.error('Unknown role:', role);
+                        window.location.href = 'student-profile.html';
                 }
             }, 1000);
         } else {
@@ -295,7 +296,32 @@ async function redirectUserBasedOnRole(uid) {
                     if (retryDoc.exists()) {
                         const userData = retryDoc.data();
                         sessionStorage.setItem('currentUser', JSON.stringify(userData));
-                        window.location.href = userData.role === 'Student' ? 'student-profile.html' : 'dashboard.html';
+                        // Redirect based on role
+                        switch(userData.role) {
+                            case 'Student':
+                                window.location.href = 'student-profile.html';
+                                break;
+                            case 'Teacher':
+                                window.location.href = 'teacher-profile.html';
+                                break;
+                            case 'Parent':
+                                window.location.href = 'parent-profile.html';
+                                break;
+                            case 'Teacher Assistant':
+                                window.location.href = 'teacher-assistant-profile.html';
+                                break;
+                            case 'Principal':
+                                window.location.href = 'principal-profile.html';
+                                break;
+                            case 'Admin':
+                                window.location.href = 'admin-profile.html';
+                                break;
+                            case 'SGB':
+                                window.location.href = 'sgb-profile.html';
+                                break;
+                            default:
+                                window.location.href = 'student-profile.html';
+                        }
                     } else {
                         showMessage('form-error', 'Registration completed but profile not found. Please try logging in again.');
                     }
