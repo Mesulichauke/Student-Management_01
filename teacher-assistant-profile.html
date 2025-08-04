@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Assistant Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background-color: #6f42c1;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .profile-section {
+            background-color: white;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background-color: #6f42c1;
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .section-header:hover {
+            background-color: #5a2d91;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .section-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .info-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #6f42c1;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background-color: #6f42c1;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #5a2d91;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        table th, table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+
+        .task-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .task-item.overdue {
+            border-left-color: #dc3545;
+        }
+
+        .task-item.completed {
+            border-left-color: #6c757d;
+            opacity: 0.7;
+        }
+
+        .priority-high {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .priority-medium {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .priority-low {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .loading {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .schedule-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .schedule-time {
+            font-weight: bold;
+            color: #6f42c1;
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    
+    <header>
+        <h1>Teacher Assistant Profile</h1>
+        <p>Welcome, <span id="ta-name" class="loading">Loading...</span></p>
+    </header>
+
+    <div class="container">
+        <!-- Personal Information -->
+        <div class="profile-section">
+            <div class="section-header" onclick="toggleSection('personal-info')">
+                <h3>Personal Information</h3>
+            </div>
+            <div id="personal-info" class="section-content">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>Basic Details</h4>
+                        <p><strong>Name:</strong> <span id="ta-full-name" class="loading">Loading...</span></p>
+                        <p><strong>Email:</strong> <span id="ta-email" class="loading">Loading...</span></p>
+                        <p><strong>Employee ID:</strong> <span id="ta-employee-id">TA001</span></p>
+                        <p><strong>Department:</strong> <span id="ta-department">Mathematics</span></p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Contact Information</h4>
+                        <p><strong>Phone:</strong> <span id="ta-phone">Not provided</span></p>
+                        <p><strong>Office:</strong> <span id="ta-office">Room 205B</span></p>
+                        <p><strong>Working Hours:</strong> Mon-Fri, 8:00 AM - 4:00 PM</p>
+                        <p><strong>Supervising Teacher:</strong> Ms. Johnson</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Tasks -->
+        <div class="profile-section">
+            <div class="section-header" onclick="toggleSection('assigned-tasks')">
+                <h3>Assigned Tasks</h3>
+            </div>
+            <div id="assigned-tasks" class="section-content">
+                <div class="form-group">
+                    <button class="btn" onclick="showNewTaskForm()">Add New Task</button>
+                    <button class="btn btn-secondary" onclick="filterTasks('all')">All Tasks</button>
+                    <button class="btn btn-secondary" onclick="filterTasks('pending')">Pending</button>
+                    <button class="btn btn-secondary" onclick="filterTasks('completed')">Completed</button>
+                </div>
+
+                <div id="new-task-form" style="display: none;">
+                    <form id="task-form">
+                        <div class="form-group">
+                            <label for="task-title">Task Title:</label>
+                            <input type="text" id="task-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-description">Description:</label>
+                            <textarea id="task-description" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-priority">Priority:</label>
+                            <select id="task-priority" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-due-date">Due Date:</label>
+                            <input type="date" id="task-due-date" required>
+                        </div>
+                        <button type="submit" class="btn">Add Task</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideNewTaskForm()">Cancel</button>
+                    </form>
+                </div>
+
+                <div id="tasks-container">
+                    <div class="task-item">
+                        <h4>Prepare Lab Materials</h4>
+                        <p>Set up chemistry lab for tomorrow's experiment on acid-base reactions.</p>
+                        <p><strong>Priority:</strong> <span class="priority-high">High</span></p>
+                        <p><strong>Due:</strong> January 5, 2025</p>
+                        <button class="btn" onclick="markTaskComplete(this)">Mark Complete</button>
+                    </div>
+                    <div class="task-item">
+                        <h4>Grade Quiz Papers</h4>
+                        <p>Grade the mathematics quiz papers for Grade 10A class.</p>
+                        <p><strong>Priority:</strong> <span class="priority-medium">Medium</span></p>
+                        <p><strong>Due:</strong> January 7, 2025</p>
+                        <button class="btn" onclick="markTaskComplete(this)">Mark Complete</button>
+                    </div>
+                    <div class="task-item completed">
+                        <h4>Update Student Records</h4>
+                        <p>Update attendance records for the past week.</p>
+                        <p><strong>Priority:</strong> <span class="priority-low">Low</span></p>
+                        <p><strong>Completed:</strong> January 3, 2025</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Support -->
+        <div class="profile-section">
+            <div class="section-header" onclick="toggleSection('class-support')">
+                <h3>Class Support Activities</h3>
+            </div>
+            <div id="class-support" class="section-content">
+                <div class="form-group">
+                    <h4>Record Class Support Activity</h4>
+                    <form id="support-activity-form">
+                        <div class="form-group">
+                            <label for="class-name">Class:</label>
+                            <select id="class-name" required>
+                                <option value="">Select Class</option>
+                                <option value="Grade 10A - Mathematics">Grade 10A - Mathematics</option>
+                                <option value="Grade 10B - Mathematics">Grade 10B - Mathematics</option>
+                                <option value="Grade 11A - Mathematics">Grade 11A - Mathematics</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="support-type">Activity Type:</label>
+                            <select id="support-type" required>
+                                <option value="">Select Type</option>
+                                <option value="Lab Setup">Lab Setup</option>
+                                <option value="Student Assistance">Student Assistance</option>
+                                <option value="Material Preparation">Material Preparation</option>
+                                <option value="Grading Support">Grading Support</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="activity-notes">Notes:</label>
+                            <textarea id="activity-notes" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn">Record Activity</button>
+                    </form>
+                </div>
+
+                <h4>Recent Activities</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Class</th>
+                            <th>Activity</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activities-table">
+                        <tr>
+                            <td>Jan 4, 2025</td>
+                            <td>Grade 10A - Mathematics</td>
+                            <td>Lab Setup</td>
+                            <td>Prepared materials for geometry lesson</td>
+                        </tr>
+                        <tr>
+                            <td>Jan 3, 2025</td>
+                            <td>Grade 11A - Mathematics</td>
+                            <td>Student Assistance</td>
+                            <td>Helped struggling students with algebra</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="profile-section">
+            <div class="section-header" onclick="toggleSection('schedule')">
+                <h3>Weekly Schedule</h3>
+            </div>
+            <div id="schedule" class="section-content">
+                <div class="schedule-grid">
+                    <div class="schedule-card">
+                        <div class="schedule-time">Monday</div>
+                        <p>8:00-10:00: Grade 10A Support</p>
+                        <p>10:30-12:00: Lab Preparation</p>
+                        <p>1:00-3:00: Grade 11A Support</p>
+                    </div>
+                    <div class="schedule-card">
+                        <div class="schedule-time">Tuesday</div>
+                        <p>8:00-10:00: Grading Session</p>
+                        <p>10:30-12:00: Grade 10B Support</p>
+                        <p>1:00-3:00: Material Preparation</p>
+                    </div>
+                    <div class="schedule-card">
+                        <div class="schedule-time">Wednesday</div>
+                        <p>8:00-10:00: Grade 10A Support</p>
+                        <p>10:30-12:00: Lab Setup</p>
+                        <p>1:00-3:00: Student Tutoring</p>
+                    </div>
+                    <div class="schedule-card">
+                        <div class="schedule-time">Thursday</div>
+                        <p>8:00-10:00: Grade 11A Support</p>
+                        <p>10:30-12:00: Administrative Tasks</p>
+                        <p>1:00-3:00: Grade 10B Support</p>
+                    </div>
+                    <div class="schedule-card">
+                        <div class="schedule-time">Friday</div>
+                        <p>8:00-10:00: Weekly Review</p>
+                        <p>10:30-12:00: Planning Session</p>
+                        <p>1:00-3:00: Equipment Check</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Tracking -->
+        <div class="profile-section">
+            <div class="section-header" onclick="toggleSection('performance')">
+                <h3>Performance Tracking</h3>
+            </div>
+            <div id="performance" class="section-content">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>This Week</h4>
+                        <p><strong>Tasks Completed:</strong> 12</p>
+                        <p><strong>Classes Supported:</strong> 8</p>
+                        <p><strong>Students Helped:</strong> 25</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>This Month</h4>
+                        <p><strong>Tasks Completed:</strong> 45</p>
+                        <p><strong>Classes Supported:</strong> 32</p>
+                        <p><strong>Students Helped:</strong> 89</p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEWMJlZlawvN38v-9QmxOVN22A0slyXNg",
+            authDomain: "nyikarisanawebsite-html.firebaseapp.com",
+            projectId: "nyikarisanawebsite-html",
+            storageBucket: "nyikarisanawebsite-html.firebasestorage.app",
+            messagingSenderId: "623319986488",
+            appId: "1:623319986488:web:9bb056a1a9e38c68a34f59"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check authentication and role
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        if (userData.role !== 'Teacher Assistant') {
+                            alert('Access denied. Teacher Assistant role required.');
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        loadTAData(userData, user);
+                    } else {
+                        alert('User profile not found.');
+                        window.location.href = 'index.html';
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    alert('Error loading profile. Please try again.');
+                }
+            } else {
+                alert('Please log in first.');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Load TA data
+        function loadTAData(userData, user) {
+            document.getElementById('ta-name').textContent = userData.firstName || 'Teacher Assistant';
+            document.getElementById('ta-full-name').textContent = `${userData.firstName} ${userData.lastName}` || 'Not provided';
+            document.getElementById('ta-email').textContent = user.email;
+            
+            if (userData.phone) {
+                document.getElementById('ta-phone').textContent = userData.phone;
+            }
+        }
+
+        // Global functions
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                alert('Logged out successfully');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('Error logging out. Please try again.');
+            }
+        };
+
+        window.toggleSection = function(sectionId) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('active');
+        };
+
+        window.showNewTaskForm = function() {
+            document.getElementById('new-task-form').style.display = 'block';
+        };
+
+        window.hideNewTaskForm = function() {
+            document.getElementById('new-task-form').style.display = 'none';
+            document.getElementById('task-form').reset();
+        };
+
+        window.markTaskComplete = function(button) {
+            const taskItem = button.closest('.task-item');
+            taskItem.classList.add('completed');
+            button.textContent = 'Completed';
+            button.disabled = true;
+        };
+
+        window.filterTasks = function(filter) {
+            const tasks = document.querySelectorAll('.task-item');
+            tasks.forEach(task => {
+                switch(filter) {
+                    case 'pending':
+                        task.style.display = task.classList.contains('completed') ? 'none' : 'block';
+                        break;
+                    case 'completed':
+                        task.style.display = task.classList.contains('completed') ? 'block' : 'none';
+                        break;
+                    default:
+                        task.style.display = 'block';
+                }
+            });
+        };
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Task form
+            document.getElementById('task-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const title = document.getElementById('task-title').value;
+                const description = document.getElementById('task-description').value;
+                const priority = document.getElementById('task-priority').value;
+                const dueDate = document.getElementById('task-due-date').value;
+                
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        const taskData = {
+                            title: title,
+                            description: description,
+                            priority: priority,
+                            dueDate: dueDate,
+                            userId: user.uid,
+                            status: 'pending',
+                            timestamp: new Date()
+                        };
+
+                        await addDoc(collection(db, 'taTasks'), taskData);
+
+                        // Add to UI
+                        const tasksContainer = document.getElementById('tasks-container');
+                        const taskDiv = document.createElement('div');
+                        taskDiv.className = 'task-item';
+                        taskDiv.innerHTML = `
+                            <h4>${title}</h4>
+                            <p>${description}</p>
+                            <p><strong>Priority:</strong> <span class="priority-${priority.toLowerCase()}">${priority}</span></p>
+                            <p><strong>Due:</strong> ${new Date(dueDate).toLocaleDateString()}</p>
+                            <button class="btn" onclick="markTaskComplete(this)">Mark Complete</button>
+                        `;
+                        tasksContainer.insertBefore(taskDiv, tasksContainer.firstChild);
+
+                        // Clear form and hide
+                        this.reset();
+                        hideNewTaskForm();
+                        showMessage('Task added successfully!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error adding task:', error);
+                    showMessage('Error adding task. Please try again.', 'error');
+                }
+            });
+
+            // Support activity form
+            document.getElementById('support-activity-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const className = document.getElementById('class-name').value;
+                const supportType = document.getElementById('support-type').value;
+                const notes = document.getElementById('activity-notes').value;
+                
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        const activityData = {
+                            className: className,
+                            supportType: supportType,
+                            notes: notes,
+                            userId: user.uid,
+                            timestamp: new Date()
+                        };
+
+                        await addDoc(collection(db, 'supportActivities'), activityData);
+
+                        // Add to table
+                        const tbody = document.getElementById('activities-table');
+                        const newRow = tbody.insertRow(0);
+                        newRow.innerHTML = `
+                            <td>${new Date().toLocaleDateString()}</td>
+                            <td>${className}</td>
+                            <td>${supportType}</td>
+                            <td>${notes || '-'}</td>
+                        `;
+
+                        // Clear form
+                        this.reset();
+                        showMessage('Activity recorded successfully!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error recording activity:', error);
+                    showMessage('Error recording activity. Please try again.', 'error');
+                }
+            });
+
+            // Initialize performance chart
+            initializePerformanceChart();
+        });
+
+        function showMessage(message, type) {
+            // Create a temporary message element
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            messageDiv.textContent = message;
+            document.querySelector('.container').appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: [8, 12, 10, 15],
+                        backgroundColor: 'rgba(111, 66, 193, 0.8)',
+                        borderColor: 'rgba(111, 66, 193, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

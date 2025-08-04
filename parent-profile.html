@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        nav h3 {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+
+        nav a {
+            color: #ffcc00;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        .profile-section {
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+        }
+
+        .profile-section h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .profile-section h2:hover {
+            background-color: #0056b3;
+        }
+
+        .dropdown-content {
+            display: none;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .dropdown-content.active {
+            display: block;
+        }
+
+        .scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .scoring-table th, .scoring-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .scoring-table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .graph-container {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f1f1f1;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .graph-container:hover {
+            background-color: #e1e1e1;
+        }
+
+        .dropdown-button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .dropdown-button:hover {
+            background-color: #0056b3;
+        }
+
+        .feedback-form {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-form h3 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .feedback-form textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .feedback-form button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .feedback-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .child-info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .metric-card h4 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    
+    <header>
+        <h1>Parent Profile</h1>
+        <nav>
+            <h3>Welcome, <span id="parent-name" class="loading">Loading...</span>!</h3>
+            <a href="index.html">Home</a>
+        </nav>
+    </header>
+
+    <!-- Personal Information Section -->
+    <div class="profile-section">
+        <h2 onclick="toggleDropdown('personal-info')">Personal Information</h2>
+        <div id="personal-info" class="dropdown-content">
+            <div class="child-info">
+                <h4>Parent Details</h4>
+                <p><strong>Name:</strong> <span id="parent-full-name" class="loading">Loading...</span></p>
+                <p><strong>Email:</strong> <span id="parent-email" class="loading">Loading...</span></p>
+                <p><strong>Phone:</strong> <span id="parent-phone">Not provided</span></p>
+                <p><strong>Address:</strong> <span id="parent-address">Not provided</span></p>
+            </div>
+            <div class="child-info">
+                <h4>Child Information</h4>
+                <p><strong>Child's Name:</strong> <span id="child-name">John Smith Jr.</span></p>
+                <p><strong>Grade:</strong> <span id="child-grade">Grade 10</span></p>
+                <p><strong>Student ID:</strong> <span id="child-student-id">STU001234</span></p>
+                <p><strong>Class Teacher:</strong> <span id="child-teacher">Ms. Johnson</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Child's Academic Performance -->
+    <div class="profile-section">
+        <h2 onclick="toggleDropdown('academic-performance')">Child's Academic Performance</h2>
+        <div id="academic-performance" class="dropdown-content">
+            <div class="performance-metrics">
+                <div class="metric-card">
+                    <h4>Overall Average</h4>
+                    <div class="metric-value">85%</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Attendance Rate</h4>
+                    <div class="metric-value">95%</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Current Rank</h4>
+                    <div class="metric-value">12/30</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Behavior Score</h4>
+                    <div class="metric-value">A+</div>
+                </div>
+            </div>
+
+            <table class="scoring-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Current Grade</th>
+                        <th>Last Test Score</th>
+                        <th>Teacher</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Mathematics</td>
+                        <td>88%</td>
+                        <td>92%</td>
+                        <td>Mr. Wilson</td>
+                    </tr>
+                    <tr>
+                        <td>English</td>
+                        <td>85%</td>
+                        <td>80%</td>
+                        <td>Ms. Davis</td>
+                    </tr>
+                    <tr>
+                        <td>Science</td>
+                        <td>90%</td>
+                        <td>95%</td>
+                        <td>Dr. Brown</td>
+                    </tr>
+                    <tr>
+                        <td>History</td>
+                        <td>78%</td>
+                        <td>75%</td>
+                        <td>Mr. Johnson</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Tracking -->
+    <div class="profile-section">
+        <h2 onclick="toggleDropdown('attendance-tracking')">Attendance Tracking</h2>
+        <div id="attendance-tracking" class="dropdown-content">
+            <h3>Monthly Attendance Overview</h3>
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+            
+            <table class="scoring-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Subject</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2025-01-03</td>
+                        <td>Present</td>
+                        <td>All Classes</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>2025-01-02</td>
+                        <td>Late</td>
+                        <td>Mathematics</td>
+                        <td>Arrived 10 minutes late</td>
+                    </tr>
+                    <tr>
+                        <td>2025-01-01</td>
+                        <td>Absent</td>
+                        <td>All Classes</td>
+                        <td>Sick leave</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Communication with Teachers -->
+    <div class="profile-section">
+        <h2 onclick="toggleDropdown('teacher-communication')">Communication with Teachers</h2>
+        <div id="teacher-communication" class="dropdown-content">
+            <div class="feedback-form">
+                <h3>Send Message to Teacher</h3>
+                <form id="teacher-message-form">
+                    <label for="teacher-select">Select Teacher:</label>
+                    <select id="teacher-select" required>
+                        <option value="">Choose a teacher</option>
+                        <option value="mr-wilson">Mr. Wilson (Mathematics)</option>
+                        <option value="ms-davis">Ms. Davis (English)</option>
+                        <option value="dr-brown">Dr. Brown (Science)</option>
+                        <option value="mr-johnson">Mr. Johnson (History)</option>
+                    </select>
+                    
+                    <label for="message-subject">Subject:</label>
+                    <input type="text" id="message-subject" placeholder="Enter message subject" required>
+                    
+                    <label for="message-content">Message:</label>
+                    <textarea id="message-content" placeholder="Type your message here..." required></textarea>
+                    
+                    <button type="submit">Send Message</button>
+                </form>
+                <div id="message-status"></div>
+            </div>
+
+            <h3>Recent Messages</h3>
+            <div class="child-info">
+                <p><strong>From:</strong> Ms. Davis (English Teacher)</p>
+                <p><strong>Subject:</strong> Great improvement in writing</p>
+                <p><strong>Message:</strong> Your child has shown excellent progress in essay writing this term. Keep up the good work!</p>
+                <p><strong>Date:</strong> January 2, 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule and Events -->
+    <div class="profile-section">
+        <h2 onclick="toggleDropdown('schedule-events')">Schedule & Events</h2>
+        <div id="schedule-events" class="dropdown-content">
+            <h3>Upcoming Events</h3>
+            <table class="scoring-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Event</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>January 15, 2025</td>
+                        <td>Parent-Teacher Conference</td>
+                        <td>2:00 PM</td>
+                        <td>Classroom 10B</td>
+                    </tr>
+                    <tr>
+                        <td>January 20, 2025</td>
+                        <td>Science Fair</td>
+                        <td>9:00 AM</td>
+                        <td>School Auditorium</td>
+                    </tr>
+                    <tr>
+                        <td>February 1, 2025</td>
+                        <td>Term Exam Start</td>
+                        <td>8:00 AM</td>
+                        <td>Exam Halls</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Weekly Schedule</h3>
+            <table class="scoring-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>8:00-9:00</td>
+                        <td>Mathematics</td>
+                        <td>English</td>
+                        <td>Science</td>
+                        <td>History</td>
+                        <td>Mathematics</td>
+                    </tr>
+                    <tr>
+                        <td>9:00-10:00</td>
+                        <td>English</td>
+                        <td>Science</td>
+                        <td>Mathematics</td>
+                        <td>Physical Ed</td>
+                        <td>English</td>
+                    </tr>
+                    <tr>
+                        <td>10:00-11:00</td>
+                        <td>Science</td>
+                        <td>History</td>
+                        <td>English</td>
+                        <td>Mathematics</td>
+                        <td>Science</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEWMJlZlawvN38v-9QmxOVN22A0slyXNg",
+            authDomain: "nyikarisanawebsite-html.firebaseapp.com",
+            projectId: "nyikarisanawebsite-html",
+            storageBucket: "nyikarisanawebsite-html.firebasestorage.app",
+            messagingSenderId: "623319986488",
+            appId: "1:623319986488:web:9bb056a1a9e38c68a34f59"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check authentication and role
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        if (userData.role !== 'Parent') {
+                            alert('Access denied. Parent role required.');
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        loadParentData(userData, user);
+                    } else {
+                        alert('User profile not found.');
+                        window.location.href = 'index.html';
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    alert('Error loading profile. Please try again.');
+                }
+            } else {
+                alert('Please log in first.');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Load parent data
+        function loadParentData(userData, user) {
+            document.getElementById('parent-name').textContent = userData.firstName || 'Parent';
+            document.getElementById('parent-full-name').textContent = `${userData.firstName} ${userData.lastName}` || 'Not provided';
+            document.getElementById('parent-email').textContent = user.email;
+            
+            if (userData.phone) {
+                document.getElementById('parent-phone').textContent = userData.phone;
+            }
+            if (userData.address) {
+                document.getElementById('parent-address').textContent = userData.address;
+            }
+        }
+
+        // Global functions
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                alert('Logged out successfully');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('Error logging out. Please try again.');
+            }
+        };
+
+        window.toggleDropdown = function(sectionId) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('active');
+        };
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Teacher message form
+            document.getElementById('teacher-message-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const teacherSelect = document.getElementById('teacher-select').value;
+                const messageSubject = document.getElementById('message-subject').value;
+                const messageContent = document.getElementById('message-content').value;
+                
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        const messageData = {
+                            to: teacherSelect,
+                            subject: messageSubject,
+                            content: messageContent,
+                            from: user.uid,
+                            fromRole: 'Parent',
+                            timestamp: new Date(),
+                            status: 'sent'
+                        };
+
+                        await addDoc(collection(db, 'messages'), messageData);
+
+                        // Clear form
+                        this.reset();
+                        showMessage('Message sent successfully!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    showMessage('Error sending message. Please try again.', 'error');
+                }
+            });
+
+            // Initialize charts
+            initializePerformanceChart();
+            initializeAttendanceChart();
+        });
+
+        function showMessage(message, type) {
+            const statusDiv = document.getElementById('message-status');
+            statusDiv.textContent = message;
+            statusDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            setTimeout(() => {
+                statusDiv.textContent = '';
+                statusDiv.className = '';
+            }, 3000);
+        }
+
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+                    datasets: [{
+                        label: 'Overall Performance (%)',
+                        data: [78, 82, 85, 87],
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeAttendanceChart() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Present', 'Absent', 'Late'],
+                    datasets: [{
+                        data: [92, 5, 3],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',
+                            'rgba(220, 53, 69, 0.8)',
+                            'rgba(255, 193, 7, 0.8)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+</body>
+</html>

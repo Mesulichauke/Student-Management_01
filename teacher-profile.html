@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f6f9;
+        }
+
+        header {
+            background-color: #28a745;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        nav a {
+            color: #ffcc00;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        /* Notification Panel Styles */
+        #notification-panel {
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            display: none;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        #notification-panel.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-container {
+            margin-bottom: 30px;
+        }
+
+        .profile-section {
+            display: none;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .profile-section.active {
+            display: block;
+        }
+
+        .profile-section p, .teacher-feedback label, .personal-info label {
+            margin: 10px 0;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"], input[type="number"], input[type="email"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"], button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #218838;
+        }
+
+        .dropdown-button {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            display: block;
+            margin: 10px 0;
+            border: none;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-button:hover {
+            background-color: #218838;
+        }
+
+        .dropdown-content {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .dropdown-content.active {
+            display: block;
+        }
+
+        .dropdown-content p {
+            margin: 5px 0;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Logout button */
+        .logout-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    
+    <header>
+        <h1>Teacher Profile</h1>
+        <nav>
+            <a href="index.html">Home</a>
+        </nav>
+    </header>
+
+    <!-- Notification Panel -->
+    <div id="notification-panel">
+        <h3>Notifications</h3>
+        <ul id="notification-list"></ul>
+    </div>
+
+    <div class="container">
+        <h2>Welcome, <span id="teacher-name" class="loading">Loading...</span>!</h2>
+
+        <!-- Personal Information Section -->
+        <button class="dropdown-button" onclick="toggleDropdown('personal-info')">Personal Information</button>
+        <div id="personal-info" class="dropdown-content">
+            <div class="personal-info">
+                <p><strong>Name:</strong> <span id="teacher-full-name" class="loading">Loading...</span></p>
+                <p><strong>Email:</strong> <span id="teacher-email" class="loading">Loading...</span></p>
+                <p><strong>Subject:</strong> <span id="teacher-subject">Mathematics</span></p>
+                <p><strong>Employee ID:</strong> <span id="teacher-id" class="loading">Loading...</span></p>
+                <p><strong>Phone:</strong> <span id="teacher-phone">Not provided</span></p>
+            </div>
+        </div>
+
+        <!-- Attendance Management -->
+        <button class="dropdown-button" onclick="toggleDropdown('attendance-section')">Attendance Management</button>
+        <div id="attendance-section" class="dropdown-content">
+            <h3>Record Student Attendance</h3>
+            <form id="attendance-form">
+                <label for="student-name">Student Name:</label>
+                <input type="text" id="student-name" placeholder="Enter student name" required>
+                
+                <label for="attendance-date">Date:</label>
+                <input type="date" id="attendance-date" required>
+                
+                <label for="attendance-status">Status:</label>
+                <select id="attendance-status" required>
+                    <option value="">Select Status</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Late">Late</option>
+                    <option value="Excused">Excused</option>
+                </select>
+                
+                <button type="submit">Record Attendance</button>
+            </form>
+
+            <h3>Attendance Records</h3>
+            <table id="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Attendance records will appear here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Grade Management -->
+        <button class="dropdown-button" onclick="toggleDropdown('grades-section')">Grade Management</button>
+        <div id="grades-section" class="dropdown-content">
+            <h3>Record Student Grades</h3>
+            <form id="grades-form">
+                <label for="grade-student-name">Student Name:</label>
+                <input type="text" id="grade-student-name" placeholder="Enter student name" required>
+                
+                <label for="assignment-name">Assignment/Test Name:</label>
+                <input type="text" id="assignment-name" placeholder="Enter assignment name" required>
+                
+                <label for="grade-score">Score:</label>
+                <input type="number" id="grade-score" min="0" max="100" placeholder="Enter score (0-100)" required>
+                
+                <label for="grade-date">Date:</label>
+                <input type="date" id="grade-date" required>
+                
+                <button type="submit">Record Grade</button>
+            </form>
+
+            <h3>Grade Records</h3>
+            <table id="grades-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Assignment</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Grade records will appear here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Class Schedule -->
+        <button class="dropdown-button" onclick="toggleDropdown('schedule-section')">Class Schedule</button>
+        <div id="schedule-section" class="dropdown-content">
+            <h3>Weekly Schedule</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>8:00-9:00</td>
+                        <td>Math 101</td>
+                        <td>Math 102</td>
+                        <td>Math 101</td>
+                        <td>Math 102</td>
+                        <td>Free Period</td>
+                    </tr>
+                    <tr>
+                        <td>9:00-10:00</td>
+                        <td>Math 102</td>
+                        <td>Math 101</td>
+                        <td>Math 102</td>
+                        <td>Math 101</td>
+                        <td>Preparation</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Student Feedback -->
+        <button class="dropdown-button" onclick="toggleDropdown('feedback-section')">Student Feedback</button>
+        <div id="feedback-section" class="dropdown-content">
+            <h3>Submit Student Feedback</h3>
+            <form id="feedback-form">
+                <label for="feedback-student">Student Name:</label>
+                <input type="text" id="feedback-student" placeholder="Enter student name" required>
+                
+                <label for="feedback-type">Feedback Type:</label>
+                <select id="feedback-type" required>
+                    <option value="">Select Type</option>
+                    <option value="Academic">Academic Performance</option>
+                    <option value="Behavior">Behavior</option>
+                    <option value="Participation">Class Participation</option>
+                    <option value="General">General Feedback</option>
+                </select>
+                
+                <label for="feedback-content">Feedback:</label>
+                <textarea id="feedback-content" rows="4" placeholder="Enter your feedback..." required></textarea>
+                
+                <button type="submit">Submit Feedback</button>
+            </form>
+            <div id="feedback-status"></div>
+        </div>
+
+        <!-- Performance Analytics -->
+        <button class="dropdown-button" onclick="toggleDropdown('analytics-section')">Performance Analytics</button>
+        <div id="analytics-section" class="dropdown-content">
+            <h3>Class Performance Overview</h3>
+            <div style="width: 100%; height: 400px;">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEWMJlZlawvN38v-9QmxOVN22A0slyXNg",
+            authDomain: "nyikarisanawebsite-html.firebaseapp.com",
+            projectId: "nyikarisanawebsite-html",
+            storageBucket: "nyikarisanawebsite-html.firebasestorage.app",
+            messagingSenderId: "623319986488",
+            appId: "1:623319986488:web:9bb056a1a9e38c68a34f59"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check authentication and role
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        if (userData.role !== 'Teacher') {
+                            alert('Access denied. Teacher role required.');
+                            window.location.href = 'index.html';
+                            return;
+                        }
+                        loadTeacherData(userData, user);
+                    } else {
+                        alert('User profile not found.');
+                        window.location.href = 'index.html';
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    alert('Error loading profile. Please try again.');
+                }
+            } else {
+                alert('Please log in first.');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Load teacher data
+        function loadTeacherData(userData, user) {
+            document.getElementById('teacher-name').textContent = userData.firstName || 'Teacher';
+            document.getElementById('teacher-full-name').textContent = `${userData.firstName} ${userData.lastName}` || 'Not provided';
+            document.getElementById('teacher-email').textContent = user.email;
+            document.getElementById('teacher-id').textContent = userData.teacherId || 'T' + Date.now().toString().slice(-6);
+            
+            if (userData.phone) {
+                document.getElementById('teacher-phone').textContent = userData.phone;
+            }
+        }
+
+        // Global functions
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                alert('Logged out successfully');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('Error logging out. Please try again.');
+            }
+        };
+
+        window.toggleDropdown = function(sectionId) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('active');
+        };
+
+        // Form handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attendance form
+            document.getElementById('attendance-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const studentName = document.getElementById('student-name').value;
+                const date = document.getElementById('attendance-date').value;
+                const status = document.getElementById('attendance-status').value;
+                
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        const attendanceData = {
+                            studentName: studentName,
+                            date: date,
+                            status: status,
+                            teacherId: user.uid,
+                            timestamp: new Date()
+                        };
+
+                        await addDoc(collection(db, 'studentAttendance'), attendanceData);
+
+                        // Add to table
+                        const tbody = document.querySelector('#attendance-table tbody');
+                        const newRow = tbody.insertRow();
+                        newRow.innerHTML = `<td>${studentName}</td><td>${date}</td><td>${status}</td>`;
+
+                        // Clear form
+                        this.reset();
+                        showMessage('Attendance recorded successfully!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error recording attendance:', error);
+                    showMessage('Error recording attendance. Please try again.', 'error');
+                }
+            });
+
+            // Grades form
+            document.getElementById('grades-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const studentName = document.getElementById('grade-student-name').value;
+                const assignmentName = document.getElementById('assignment-name').value;
+                const score = document.getElementById('grade-score').value;
+                const date = document.getElementById('grade-date').value;
+                
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        const gradeData = {
+                            studentName: studentName,
+                            assignmentName: assignmentName,
+                            score: parseInt(score),
+                            date: date,
+                            teacherId: user.uid,
+                            timestamp: new Date()
+                        };
+
+                        await addDoc(collection(db, 'studentGrades'), gradeData);
+
+                        // Add to table
+                        const tbody = document.querySelector('#grades-table tbody');
+                        const newRow = tbody.insertRow();
+                        newRow.innerHTML = `<td>${studentName}</td><td>${assignmentName}</td><td>${score}</td><td>${date}</td>`;
+
+                        // Clear form
+                        this.reset();
+                        showMessage('Grade recorded successfully!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error recording grade:', error);
+                    showMessage('Error recording grade. Please try again.', 'error');
+                }
+            });
+
+            // Feedback form
+            document.getElementById('feedback-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const studentName = document.getElementById('feedback-student').value;
+                const feedbackType = document.getElementById('feedback-type').value;
+                const feedbackContent = document.getElementById('feedback-content').value;
+                
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        const feedbackData = {
+                            studentName: studentName,
+                            type: feedbackType,
+                            content: feedbackContent,
+                            teacherId: user.uid,
+                            timestamp: new Date()
+                        };
+
+                        await addDoc(collection(db, 'studentFeedback'), feedbackData);
+
+                        // Clear form
+                        this.reset();
+                        showMessage('Feedback submitted successfully!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error submitting feedback:', error);
+                    showMessage('Error submitting feedback. Please try again.', 'error');
+                }
+            });
+
+            // Initialize performance chart
+            initializePerformanceChart();
+        });
+
+        function showMessage(message, type) {
+            const statusDiv = document.getElementById('feedback-status');
+            if (statusDiv) {
+                statusDiv.textContent = message;
+                statusDiv.className = type === 'success' ? 'success-message' : 'error-message';
+                setTimeout(() => {
+                    statusDiv.textContent = '';
+                    statusDiv.className = '';
+                }, 3000);
+            }
+        }
+
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Test 1', 'Test 2', 'Assignment 1', 'Assignment 2', 'Quiz 1'],
+                    datasets: [{
+                        label: 'Class Average (%)',
+                        data: [78, 82, 85, 79, 88],
+                        backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
